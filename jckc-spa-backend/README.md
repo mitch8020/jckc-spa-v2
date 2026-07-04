@@ -1,98 +1,84 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# jckc-spa-backend
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+NestJS 11 REST API for the JCKC daycare-management app (v2 rewrite of the
+legacy Express/EJS app). Serves `/api/*` on port **3001**; auth is hosted
+in-process by [better-auth](https://better-auth.com) at `/api/auth/*`
+(Google OAuth + email/password, MongoDB adapter on the shared mongoose
+connection).
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
-
-## Description
-
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
-
-## Project setup
+## Setup
 
 ```bash
-$ npm install
+npm install
+cp .env.example .env   # then fill in BETTER_AUTH_SECRET (see below)
+npm run start:dev      # http://localhost:3001/api/health
 ```
 
-## Compile and run the project
+Requires a MongoDB instance (default `mongodb://localhost:27017/jckc-v2`).
+Domain collections keep the legacy names/fields (`students`, `classrooms`,
+`guardians`); better-auth owns `user`, `account`, `session`.
 
-```bash
-# development
-$ npm run start
+## Environment variables (.env)
 
-# watch mode
-$ npm run start:dev
+| Var | Required | Purpose |
+|---|---|---|
+| `MONGO_URI` | yes | MongoDB connection string |
+| `BETTER_AUTH_SECRET` | yes | Session signing secret — `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"` |
+| `BETTER_AUTH_URL` | yes | Backend base URL (`http://localhost:3001`) |
+| `FRONTEND_ORIGIN` | yes | CORS + trusted origin (`http://localhost:3000`) |
+| `PORT` | no | Defaults to 3001 |
+| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | no | Enables Google sign-in when both set |
+| `ADMIN_EMAILS` | no | Comma-separated emails that register as admin (bootstrap) |
 
-# production mode
-$ npm run start:prod
+Config is validated at boot (`src/config/env.validation.ts`) — the app
+fails fast when a required var is missing.
+
+## Scripts
+
+| Script | Purpose |
+|---|---|
+| `npm run start:dev` | Dev server with watch |
+| `npm run build` / `npm run start:prod` | Compile to `dist/` and run |
+| `npm test` | Unit tests (`src/**/*.spec.ts`) |
+| `npm run test:e2e` | E2E tests (boots AppModule on mongodb-memory-server) |
+| `npm run lint` | ESLint (typescript-eslint typeChecked + prettier) |
+| `npm run migrate:users -- --dry-run\|--write` | Legacy `users` collection → better-auth `user`+`account` docs |
+| `npm run migrate:guardian-links -- --dry-run\|--write` | Cast string `students[].student` ids on guardians to ObjectIds |
+
+## Architecture map
+
+```
+src/
+  main.ts                    # bodyParser:false; better-auth mounted on /api/auth/{*splat}
+                             # BEFORE express.json(); CORS; /api prefix; ValidationPipe;
+                             # global exception filter; port 3001
+  app.module.ts              # ConfigModule (validated) + MongooseModule + feature modules
+  config/env.validation.ts   # fail-fast env validation
+  assets/fonts/              # Roboto TTFs for pdfmake reports (copied to dist/assets/fonts
+                             # by the nest-cli asset copy; resolved relative to the module)
+  common/
+    decorators/              # @Public, @Roles('admin'|'teacher'|'parent'), @CurrentUser
+    dto/                     # shared wire DTO shapes + serializers (Student/Classroom/Guardian)
+    guards/roles.guard.ts    # global RolesGuard (APP_GUARD, honors @Roles)
+    filters/                 # global exception filter (CastError -> 404, fallback 500)
+    utils/                   # age.ts (legacy age/format/sort helpers + US_STATE_CODES),
+                             # collation.ts (shared case-insensitive sort collation),
+                             # pagination.ts (legacy page-size-10 math), escape-regex.ts
+    validators/              # @IsDateOfBirth (YYYY-MM-DD, real date, not future)
+  database/schemas/          # Student / Classroom / Guardian (legacy-compatible) + AuthUser
+                             # (mongoose view over better-auth's 'user' collection)
+  modules/
+    auth/                    # better-auth instance provider (AUTH_INSTANCE), global
+                             # AuthGuard (session -> req.user), SessionUser type
+    users/                   # /api/users: me GET/PATCH, register, admin list + role PATCH
+    health/                  # GET /api/health (public)
+    students|classrooms|guardians|reports|dashboard/   # feature modules (see API-CONTRACT)
+scripts/                     # ts-node data migrations (dry-run/write modes)
+test/                        # e2e specs + mongodb-memory-server helper
 ```
 
-## Run tests
-
-```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
-```
-
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
-```
-
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
-
-## Resources
-
-Check out a few resources that may come in handy when working with NestJS:
-
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+Auth model: better-auth session cookie; every route is guarded by the
+global AuthGuard unless marked `@Public()`. Roles are a single enum on
+`user.role` (`'' | parent | teacher | admin`); `POST /api/users/register`
+completes registration for the authenticated user (409 if repeated) and
+bootstraps admins from `ADMIN_EMAILS`.
