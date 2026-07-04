@@ -9,48 +9,276 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as RegisterRouteImport } from './routes/register'
+import { Route as AuthedRouteImport } from './routes/_authed'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
+import { Route as AuthedUsersRouteImport } from './routes/_authed/users'
+import { Route as AuthedReportsRouteImport } from './routes/_authed/reports'
+import { Route as AuthedProfileRouteImport } from './routes/_authed/profile'
+import { Route as AuthedDashboardRouteImport } from './routes/_authed/dashboard'
+import { Route as AuthedStudentsIndexRouteImport } from './routes/_authed/students/index'
+import { Route as AuthedClassroomsIndexRouteImport } from './routes/_authed/classrooms/index'
+import { Route as AuthedStudentsNewRouteImport } from './routes/_authed/students/new'
+import { Route as AuthedStudentsStudentIdRouteImport } from './routes/_authed/students/$studentId'
+import { Route as AuthedGuardiansGuardianIdRouteImport } from './routes/_authed/guardians/$guardianId'
+import { Route as AuthedClassroomsNewRouteImport } from './routes/_authed/classrooms/new'
+import { Route as AuthedClassroomsClassroomIdRouteImport } from './routes/_authed/classrooms/$classroomId'
+import { Route as AuthedStudentsStudentIdEditRouteImport } from './routes/_authed/students/$studentId_.edit'
+import { Route as AuthedStudentsStudentIdAddGuardianRouteImport } from './routes/_authed/students/$studentId_.add-guardian'
+import { Route as AuthedGuardiansGuardianIdEditRouteImport } from './routes/_authed/guardians/$guardianId_.edit'
+import { Route as AuthedClassroomsClassroomIdRosterRouteImport } from './routes/_authed/classrooms/$classroomId_.roster'
+import { Route as AuthedClassroomsClassroomIdEditRouteImport } from './routes/_authed/classrooms/$classroomId_.edit'
 
+const RegisterRoute = RegisterRouteImport.update({
+  id: '/register',
+  path: '/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthedRoute = AuthedRouteImport.update({
+  id: '/_authed',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
-  id: '/api/auth/$',
-  path: '/api/auth/$',
-  getParentRoute: () => rootRouteImport,
+const AuthedUsersRoute = AuthedUsersRouteImport.update({
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => AuthedRoute,
 } as any)
+const AuthedReportsRoute = AuthedReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
+  getParentRoute: () => AuthedRoute,
+} as any)
+const AuthedProfileRoute = AuthedProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => AuthedRoute,
+} as any)
+const AuthedDashboardRoute = AuthedDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AuthedRoute,
+} as any)
+const AuthedStudentsIndexRoute = AuthedStudentsIndexRouteImport.update({
+  id: '/students/',
+  path: '/students/',
+  getParentRoute: () => AuthedRoute,
+} as any)
+const AuthedClassroomsIndexRoute = AuthedClassroomsIndexRouteImport.update({
+  id: '/classrooms/',
+  path: '/classrooms/',
+  getParentRoute: () => AuthedRoute,
+} as any)
+const AuthedStudentsNewRoute = AuthedStudentsNewRouteImport.update({
+  id: '/students/new',
+  path: '/students/new',
+  getParentRoute: () => AuthedRoute,
+} as any)
+const AuthedStudentsStudentIdRoute = AuthedStudentsStudentIdRouteImport.update({
+  id: '/students/$studentId',
+  path: '/students/$studentId',
+  getParentRoute: () => AuthedRoute,
+} as any)
+const AuthedGuardiansGuardianIdRoute =
+  AuthedGuardiansGuardianIdRouteImport.update({
+    id: '/guardians/$guardianId',
+    path: '/guardians/$guardianId',
+    getParentRoute: () => AuthedRoute,
+  } as any)
+const AuthedClassroomsNewRoute = AuthedClassroomsNewRouteImport.update({
+  id: '/classrooms/new',
+  path: '/classrooms/new',
+  getParentRoute: () => AuthedRoute,
+} as any)
+const AuthedClassroomsClassroomIdRoute =
+  AuthedClassroomsClassroomIdRouteImport.update({
+    id: '/classrooms/$classroomId',
+    path: '/classrooms/$classroomId',
+    getParentRoute: () => AuthedRoute,
+  } as any)
+const AuthedStudentsStudentIdEditRoute =
+  AuthedStudentsStudentIdEditRouteImport.update({
+    id: '/students/$studentId_/edit',
+    path: '/students/$studentId/edit',
+    getParentRoute: () => AuthedRoute,
+  } as any)
+const AuthedStudentsStudentIdAddGuardianRoute =
+  AuthedStudentsStudentIdAddGuardianRouteImport.update({
+    id: '/students/$studentId_/add-guardian',
+    path: '/students/$studentId/add-guardian',
+    getParentRoute: () => AuthedRoute,
+  } as any)
+const AuthedGuardiansGuardianIdEditRoute =
+  AuthedGuardiansGuardianIdEditRouteImport.update({
+    id: '/guardians/$guardianId_/edit',
+    path: '/guardians/$guardianId/edit',
+    getParentRoute: () => AuthedRoute,
+  } as any)
+const AuthedClassroomsClassroomIdRosterRoute =
+  AuthedClassroomsClassroomIdRosterRouteImport.update({
+    id: '/classrooms/$classroomId_/roster',
+    path: '/classrooms/$classroomId/roster',
+    getParentRoute: () => AuthedRoute,
+  } as any)
+const AuthedClassroomsClassroomIdEditRoute =
+  AuthedClassroomsClassroomIdEditRouteImport.update({
+    id: '/classrooms/$classroomId_/edit',
+    path: '/classrooms/$classroomId/edit',
+    getParentRoute: () => AuthedRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/api/auth/$': typeof ApiAuthSplatRoute
+  '/register': typeof RegisterRoute
+  '/dashboard': typeof AuthedDashboardRoute
+  '/profile': typeof AuthedProfileRoute
+  '/reports': typeof AuthedReportsRoute
+  '/users': typeof AuthedUsersRoute
+  '/classrooms/$classroomId': typeof AuthedClassroomsClassroomIdRoute
+  '/classrooms/new': typeof AuthedClassroomsNewRoute
+  '/guardians/$guardianId': typeof AuthedGuardiansGuardianIdRoute
+  '/students/$studentId': typeof AuthedStudentsStudentIdRoute
+  '/students/new': typeof AuthedStudentsNewRoute
+  '/classrooms/': typeof AuthedClassroomsIndexRoute
+  '/students/': typeof AuthedStudentsIndexRoute
+  '/classrooms/$classroomId/edit': typeof AuthedClassroomsClassroomIdEditRoute
+  '/classrooms/$classroomId/roster': typeof AuthedClassroomsClassroomIdRosterRoute
+  '/guardians/$guardianId/edit': typeof AuthedGuardiansGuardianIdEditRoute
+  '/students/$studentId/add-guardian': typeof AuthedStudentsStudentIdAddGuardianRoute
+  '/students/$studentId/edit': typeof AuthedStudentsStudentIdEditRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/api/auth/$': typeof ApiAuthSplatRoute
+  '/register': typeof RegisterRoute
+  '/dashboard': typeof AuthedDashboardRoute
+  '/profile': typeof AuthedProfileRoute
+  '/reports': typeof AuthedReportsRoute
+  '/users': typeof AuthedUsersRoute
+  '/classrooms/$classroomId': typeof AuthedClassroomsClassroomIdRoute
+  '/classrooms/new': typeof AuthedClassroomsNewRoute
+  '/guardians/$guardianId': typeof AuthedGuardiansGuardianIdRoute
+  '/students/$studentId': typeof AuthedStudentsStudentIdRoute
+  '/students/new': typeof AuthedStudentsNewRoute
+  '/classrooms': typeof AuthedClassroomsIndexRoute
+  '/students': typeof AuthedStudentsIndexRoute
+  '/classrooms/$classroomId/edit': typeof AuthedClassroomsClassroomIdEditRoute
+  '/classrooms/$classroomId/roster': typeof AuthedClassroomsClassroomIdRosterRoute
+  '/guardians/$guardianId/edit': typeof AuthedGuardiansGuardianIdEditRoute
+  '/students/$studentId/add-guardian': typeof AuthedStudentsStudentIdAddGuardianRoute
+  '/students/$studentId/edit': typeof AuthedStudentsStudentIdEditRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/api/auth/$': typeof ApiAuthSplatRoute
+  '/_authed': typeof AuthedRouteWithChildren
+  '/register': typeof RegisterRoute
+  '/_authed/dashboard': typeof AuthedDashboardRoute
+  '/_authed/profile': typeof AuthedProfileRoute
+  '/_authed/reports': typeof AuthedReportsRoute
+  '/_authed/users': typeof AuthedUsersRoute
+  '/_authed/classrooms/$classroomId': typeof AuthedClassroomsClassroomIdRoute
+  '/_authed/classrooms/new': typeof AuthedClassroomsNewRoute
+  '/_authed/guardians/$guardianId': typeof AuthedGuardiansGuardianIdRoute
+  '/_authed/students/$studentId': typeof AuthedStudentsStudentIdRoute
+  '/_authed/students/new': typeof AuthedStudentsNewRoute
+  '/_authed/classrooms/': typeof AuthedClassroomsIndexRoute
+  '/_authed/students/': typeof AuthedStudentsIndexRoute
+  '/_authed/classrooms/$classroomId_/edit': typeof AuthedClassroomsClassroomIdEditRoute
+  '/_authed/classrooms/$classroomId_/roster': typeof AuthedClassroomsClassroomIdRosterRoute
+  '/_authed/guardians/$guardianId_/edit': typeof AuthedGuardiansGuardianIdEditRoute
+  '/_authed/students/$studentId_/add-guardian': typeof AuthedStudentsStudentIdAddGuardianRoute
+  '/_authed/students/$studentId_/edit': typeof AuthedStudentsStudentIdEditRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/api/auth/$'
+  fullPaths:
+    | '/'
+    | '/register'
+    | '/dashboard'
+    | '/profile'
+    | '/reports'
+    | '/users'
+    | '/classrooms/$classroomId'
+    | '/classrooms/new'
+    | '/guardians/$guardianId'
+    | '/students/$studentId'
+    | '/students/new'
+    | '/classrooms/'
+    | '/students/'
+    | '/classrooms/$classroomId/edit'
+    | '/classrooms/$classroomId/roster'
+    | '/guardians/$guardianId/edit'
+    | '/students/$studentId/add-guardian'
+    | '/students/$studentId/edit'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/api/auth/$'
-  id: '__root__' | '/' | '/api/auth/$'
+  to:
+    | '/'
+    | '/register'
+    | '/dashboard'
+    | '/profile'
+    | '/reports'
+    | '/users'
+    | '/classrooms/$classroomId'
+    | '/classrooms/new'
+    | '/guardians/$guardianId'
+    | '/students/$studentId'
+    | '/students/new'
+    | '/classrooms'
+    | '/students'
+    | '/classrooms/$classroomId/edit'
+    | '/classrooms/$classroomId/roster'
+    | '/guardians/$guardianId/edit'
+    | '/students/$studentId/add-guardian'
+    | '/students/$studentId/edit'
+  id:
+    | '__root__'
+    | '/'
+    | '/_authed'
+    | '/register'
+    | '/_authed/dashboard'
+    | '/_authed/profile'
+    | '/_authed/reports'
+    | '/_authed/users'
+    | '/_authed/classrooms/$classroomId'
+    | '/_authed/classrooms/new'
+    | '/_authed/guardians/$guardianId'
+    | '/_authed/students/$studentId'
+    | '/_authed/students/new'
+    | '/_authed/classrooms/'
+    | '/_authed/students/'
+    | '/_authed/classrooms/$classroomId_/edit'
+    | '/_authed/classrooms/$classroomId_/roster'
+    | '/_authed/guardians/$guardianId_/edit'
+    | '/_authed/students/$studentId_/add-guardian'
+    | '/_authed/students/$studentId_/edit'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  ApiAuthSplatRoute: typeof ApiAuthSplatRoute
+  AuthedRoute: typeof AuthedRouteWithChildren
+  RegisterRoute: typeof RegisterRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/register': {
+      id: '/register'
+      path: '/register'
+      fullPath: '/register'
+      preLoaderRoute: typeof RegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authed': {
+      id: '/_authed'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -58,20 +286,178 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/auth/$': {
-      id: '/api/auth/$'
-      path: '/api/auth/$'
-      fullPath: '/api/auth/$'
-      preLoaderRoute: typeof ApiAuthSplatRouteImport
-      parentRoute: typeof rootRouteImport
+    '/_authed/users': {
+      id: '/_authed/users'
+      path: '/users'
+      fullPath: '/users'
+      preLoaderRoute: typeof AuthedUsersRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/_authed/reports': {
+      id: '/_authed/reports'
+      path: '/reports'
+      fullPath: '/reports'
+      preLoaderRoute: typeof AuthedReportsRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/_authed/profile': {
+      id: '/_authed/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof AuthedProfileRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/_authed/dashboard': {
+      id: '/_authed/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof AuthedDashboardRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/_authed/students/': {
+      id: '/_authed/students/'
+      path: '/students'
+      fullPath: '/students/'
+      preLoaderRoute: typeof AuthedStudentsIndexRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/_authed/classrooms/': {
+      id: '/_authed/classrooms/'
+      path: '/classrooms'
+      fullPath: '/classrooms/'
+      preLoaderRoute: typeof AuthedClassroomsIndexRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/_authed/students/new': {
+      id: '/_authed/students/new'
+      path: '/students/new'
+      fullPath: '/students/new'
+      preLoaderRoute: typeof AuthedStudentsNewRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/_authed/students/$studentId': {
+      id: '/_authed/students/$studentId'
+      path: '/students/$studentId'
+      fullPath: '/students/$studentId'
+      preLoaderRoute: typeof AuthedStudentsStudentIdRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/_authed/guardians/$guardianId': {
+      id: '/_authed/guardians/$guardianId'
+      path: '/guardians/$guardianId'
+      fullPath: '/guardians/$guardianId'
+      preLoaderRoute: typeof AuthedGuardiansGuardianIdRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/_authed/classrooms/new': {
+      id: '/_authed/classrooms/new'
+      path: '/classrooms/new'
+      fullPath: '/classrooms/new'
+      preLoaderRoute: typeof AuthedClassroomsNewRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/_authed/classrooms/$classroomId': {
+      id: '/_authed/classrooms/$classroomId'
+      path: '/classrooms/$classroomId'
+      fullPath: '/classrooms/$classroomId'
+      preLoaderRoute: typeof AuthedClassroomsClassroomIdRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/_authed/students/$studentId_/edit': {
+      id: '/_authed/students/$studentId_/edit'
+      path: '/students/$studentId/edit'
+      fullPath: '/students/$studentId/edit'
+      preLoaderRoute: typeof AuthedStudentsStudentIdEditRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/_authed/students/$studentId_/add-guardian': {
+      id: '/_authed/students/$studentId_/add-guardian'
+      path: '/students/$studentId/add-guardian'
+      fullPath: '/students/$studentId/add-guardian'
+      preLoaderRoute: typeof AuthedStudentsStudentIdAddGuardianRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/_authed/guardians/$guardianId_/edit': {
+      id: '/_authed/guardians/$guardianId_/edit'
+      path: '/guardians/$guardianId/edit'
+      fullPath: '/guardians/$guardianId/edit'
+      preLoaderRoute: typeof AuthedGuardiansGuardianIdEditRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/_authed/classrooms/$classroomId_/roster': {
+      id: '/_authed/classrooms/$classroomId_/roster'
+      path: '/classrooms/$classroomId/roster'
+      fullPath: '/classrooms/$classroomId/roster'
+      preLoaderRoute: typeof AuthedClassroomsClassroomIdRosterRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/_authed/classrooms/$classroomId_/edit': {
+      id: '/_authed/classrooms/$classroomId_/edit'
+      path: '/classrooms/$classroomId/edit'
+      fullPath: '/classrooms/$classroomId/edit'
+      preLoaderRoute: typeof AuthedClassroomsClassroomIdEditRouteImport
+      parentRoute: typeof AuthedRoute
     }
   }
 }
 
+interface AuthedRouteChildren {
+  AuthedDashboardRoute: typeof AuthedDashboardRoute
+  AuthedProfileRoute: typeof AuthedProfileRoute
+  AuthedReportsRoute: typeof AuthedReportsRoute
+  AuthedUsersRoute: typeof AuthedUsersRoute
+  AuthedClassroomsClassroomIdRoute: typeof AuthedClassroomsClassroomIdRoute
+  AuthedClassroomsNewRoute: typeof AuthedClassroomsNewRoute
+  AuthedGuardiansGuardianIdRoute: typeof AuthedGuardiansGuardianIdRoute
+  AuthedStudentsStudentIdRoute: typeof AuthedStudentsStudentIdRoute
+  AuthedStudentsNewRoute: typeof AuthedStudentsNewRoute
+  AuthedClassroomsIndexRoute: typeof AuthedClassroomsIndexRoute
+  AuthedStudentsIndexRoute: typeof AuthedStudentsIndexRoute
+  AuthedClassroomsClassroomIdEditRoute: typeof AuthedClassroomsClassroomIdEditRoute
+  AuthedClassroomsClassroomIdRosterRoute: typeof AuthedClassroomsClassroomIdRosterRoute
+  AuthedGuardiansGuardianIdEditRoute: typeof AuthedGuardiansGuardianIdEditRoute
+  AuthedStudentsStudentIdAddGuardianRoute: typeof AuthedStudentsStudentIdAddGuardianRoute
+  AuthedStudentsStudentIdEditRoute: typeof AuthedStudentsStudentIdEditRoute
+}
+
+const AuthedRouteChildren: AuthedRouteChildren = {
+  AuthedDashboardRoute: AuthedDashboardRoute,
+  AuthedProfileRoute: AuthedProfileRoute,
+  AuthedReportsRoute: AuthedReportsRoute,
+  AuthedUsersRoute: AuthedUsersRoute,
+  AuthedClassroomsClassroomIdRoute: AuthedClassroomsClassroomIdRoute,
+  AuthedClassroomsNewRoute: AuthedClassroomsNewRoute,
+  AuthedGuardiansGuardianIdRoute: AuthedGuardiansGuardianIdRoute,
+  AuthedStudentsStudentIdRoute: AuthedStudentsStudentIdRoute,
+  AuthedStudentsNewRoute: AuthedStudentsNewRoute,
+  AuthedClassroomsIndexRoute: AuthedClassroomsIndexRoute,
+  AuthedStudentsIndexRoute: AuthedStudentsIndexRoute,
+  AuthedClassroomsClassroomIdEditRoute: AuthedClassroomsClassroomIdEditRoute,
+  AuthedClassroomsClassroomIdRosterRoute:
+    AuthedClassroomsClassroomIdRosterRoute,
+  AuthedGuardiansGuardianIdEditRoute: AuthedGuardiansGuardianIdEditRoute,
+  AuthedStudentsStudentIdAddGuardianRoute:
+    AuthedStudentsStudentIdAddGuardianRoute,
+  AuthedStudentsStudentIdEditRoute: AuthedStudentsStudentIdEditRoute,
+}
+
+const AuthedRouteWithChildren =
+  AuthedRoute._addFileChildren(AuthedRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  ApiAuthSplatRoute: ApiAuthSplatRoute,
+  AuthedRoute: AuthedRouteWithChildren,
+  RegisterRoute: RegisterRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
