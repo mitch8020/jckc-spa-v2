@@ -31,6 +31,9 @@
     "test:all": "npm run test --",
     "test:backend": "node scripts/run-command.mjs --phase test --target backend",
     "test:frontend": "node scripts/run-command.mjs --phase test --target frontend",
+    "test:e2e": "npm run test:e2e:backend && npm run test:e2e:frontend",
+    "test:e2e:backend": "npm --prefix jckc-spa-backend run test:e2e",
+    "test:e2e:frontend": "npm --prefix jckc-spa-frontend run test:e2e",
     "blt": "node scripts/run-blt.mjs --target both",
     "blt:backend": "node scripts/run-blt.mjs --target backend --label jckc-spa-backend",
     "blt:frontend": "node scripts/run-blt.mjs --target frontend --label jckc-spa-frontend"
