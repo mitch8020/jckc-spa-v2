@@ -127,29 +127,33 @@ Tailwind v4 CSS-first setup: `@import 'tailwindcss'`, `@plugin '@tailwindcss/typ
 - **Manrope** (400/500/600/700/800) — body font, wired as `--font-sans` in `@theme inline` (so Tailwind's `font-sans` = Manrope). Applied to `body`.
 - **Fraunces** (optical-size axis, 500/700) — display serif, applied ONLY via the `.display-title` utility class (`font-family: 'Fraunces', Georgia, serif`). Use `.display-title` for headings/hero text.
 
-**Custom brand token vocabulary** (raw CSS custom properties on `:root`, each with a `.dark` override — a light seafoam/tropical palette):
+**Custom brand token vocabulary** (raw CSS custom properties on `:root`, each with a `.dark` override). The token *names* are the scaffold's originals, but the *values* mirror the legacy `jckc-web-app-private` palette (indigo-600 nav/primary, sky-500 focus, gray neutrals):
 
 | Token | Light value | Role |
 |---|---|---|
-| `--sea-ink` | `#173a40` | primary text (dark teal ink); body `color` |
-| `--sea-ink-soft` | `#416166` | secondary/muted text (e.g. `.nav-link` resting color) |
-| `--lagoon` | `#4fb8b2` | teal accent (gradients, nav underline) |
-| `--lagoon-deep` | `#328f97` | stronger teal; link color |
-| `--palm` | `#2f6a4a` | green accent |
-| `--sand` | `#e7f0e8` | pale green-sand background tone |
-| `--foam` | `#f3faf5` | near-white background tone |
-| `--surface` | `rgba(255,255,255,.74)` | translucent card surface |
-| `--surface-strong` | `rgba(255,255,255,.9)` | more opaque surface |
-| `--line` | `rgba(23,58,64,.14)` | hairline borders |
+| `--sea-ink` | `#111827` (gray-900) | primary text; body `color` |
+| `--sea-ink-soft` | `#4b5563` (gray-600) | secondary/muted text |
+| `--lagoon` | `#0ea5e9` (sky-500) | accent (focus rings, chip washes) |
+| `--lagoon-deep` | `#0369a1` (sky-700) | stronger accent (avatar initial, `.pill-lagoon`) |
+| `--palm` | `#4f46e5` (indigo-600) | primary brand accent; link color |
+| `--sand` | `#f3f4f6` (gray-100) | subtle background tone |
+| `--foam` | `#f9fafb` (gray-50) | near-white background tone |
+| `--surface` | `rgba(255,255,255,.8)` | translucent card surface |
+| `--surface-strong` | `rgba(255,255,255,.94)` | more opaque surface |
+| `--line` | `rgba(17,24,39,.13)` | hairline borders |
 | `--inset-glint` | `rgba(255,255,255,.82)` | inset top-highlight in card shadows |
-| `--kicker` | `rgba(47,106,74,.9)` | eyebrow/kicker text color |
-| `--bg-base` | `#e7f3ec` | page background base |
-| `--header-bg` | `rgba(251,255,248,.84)` | translucent header/footer background |
-| `--chip-bg` / `--chip-line` | white/green rgba | chip/badge background & border |
-| `--link-bg-hover` | `rgba(255,255,255,.9)` | hover background for link-like elements |
-| `--hero-a` / `--hero-b` | teal/green rgba | hero radial-gradient washes |
+| `--kicker` | `rgba(79,70,229,.9)` | eyebrow/kicker text color (indigo) |
+| `--bg-base` | `#f3f4f6` (gray-100) | page background base |
+| `--header-bg` | `#4f46e5` (indigo-600) | solid header background (legacy navbar) |
+| `--header-ink` / `--header-ink-soft` | white / `#c7d2fe` (indigo-200) | header text & resting nav-link color |
+| `--header-link-hover` | `rgba(99,102,241,.75)` | header link hover wash (indigo-500/75) |
+| `--chip-bg` / `--chip-line` | white/indigo rgba | chip/badge background & border |
+| `--link-bg-hover` | `rgba(238,242,255,.9)` | hover background for link-like elements (indigo-50) |
+| `--hero-a` / `--hero-b` | indigo/sky rgba | hero radial-gradient washes |
+| `--age-infant/-toddler/-preschool` | `#db2777` / `#eab308` / `#22c55e` | legacy age-group identity (pink-600 / yellow-500 / green-500) |
+| `--age-*-ink` | pink-700 / yellow-800 / green-700 | darkened text-safe variants for pill labels |
 
-Dark mode flips these to a deep-teal night palette (e.g. `--sea-ink: #d7ece8`, `--bg-base: #0a1418`, surfaces become dark translucent rgba).
+Dark mode flips these to a gray-950/indigo night palette (e.g. `--sea-ink: #f9fafb`, `--bg-base: #030712`, `--header-bg: #312e81` indigo-900, age colors move to 400 shades, surfaces become dark translucent rgba).
 
 **Important:** these brand tokens are NOT registered in `@theme`, so there are no Tailwind utilities like `bg-lagoon`. Consume them via arbitrary values (`text-[var(--sea-ink)]`, `bg-[var(--surface)]`, `border-[var(--line)]`) or the provided CSS classes.
 
@@ -157,14 +161,14 @@ Dark mode flips these to a deep-teal night palette (e.g. `--sea-ink: #d7ece8`, `
 - `.page-wrap` — centered content column: `width: min(1080px, calc(100% - 2rem)); margin-inline: auto`.
 - `.display-title` — Fraunces serif display font.
 - `.island-shell` — the signature card: hairline `--line` border, `--surface-strong`→`--surface` gradient, layered soft shadows with `--inset-glint` inset highlight, `backdrop-filter: blur(4px)`.
-- `.feature-card` — lighter card variant; `:hover` lifts `-2px` and tints border toward `--lagoon-deep`.
-- `.island-kicker` — uppercase eyebrow label: `letter-spacing: .16em`, 700 weight, `.69rem`, `--kicker` color.
-- `.nav-link` — nav item with animated scaleX underline (`--lagoon` → `#7ed3bf` gradient) on hover / `.is-active`.
+- `.feature-card` — lighter card variant; `:hover` lifts `-2px` and tints border toward `--palm`.
+- `.island-kicker` — uppercase eyebrow label: `letter-spacing: .16em`, 700 weight, `.69rem`, `--kicker` color (header-scoped override uses `--header-ink-soft`).
+- `.nav-link` — header nav item (`--header-ink-soft`, hover/active `--header-ink`) with animated scaleX underline (white → `--header-ink-soft` gradient) on hover / `.is-active`.
 - `.rise-in` — 700ms entrance animation (fade + 12px rise, `cubic-bezier(0.16,1,0.3,1)`).
 - `.site-footer` — top hairline + translucent `--header-bg` mix.
 - Global: `body` has a layered radial/linear gradient background built from the hero tokens plus fixed `::before` (soft light blobs) and `::after` (28px grid lines masked radially) overlays; `a` styled with `--lagoon-deep` + soft underline; `code` gets a bordered pill treatment; `button, .island-shell, a` share a 180ms color/transform transition.
 
-**shadcn variable mapping**: the full standard shadcn/ui token set is also present — `--background/--foreground`, `--card`, `--popover`, `--primary`, `--secondary`, `--muted`, `--accent`, `--destructive` (each with `-foreground`), `--border`, `--input`, `--ring`, `--chart-1..5`, `--sidebar*` and `--radius: 0.625rem` — defined in **oklch** as stock zinc values (NOT yet themed to the brand palette), with `.dark` overrides. The `@theme inline` block maps each to Tailwind color tokens (`--color-background: var(--background)` etc.) plus radius scale `--radius-sm/md/lg/xl` = radius −4px/−2px/base/+4px, enabling standard shadcn utilities (`bg-background`, `text-muted-foreground`, `border-border`, `rounded-lg`, ...). An `@layer base` block applies `border-border outline-ring/50` to `*` and sets body background/foreground from the shadcn vars — note this **overrides** the earlier gradient `background` on `body` per normal cascade (both declarations exist; the `@layer base` one wins for `background-color`/`color` since it comes later at equal specificity, though un-layered rules beat layered ones — in practice the earlier un-layered `body` rule wins because un-layered styles take precedence over `@layer` styles; be aware both exist when styling).
+**shadcn variable mapping**: the full standard shadcn/ui token set is also present — `--background/--foreground`, `--card`, `--popover`, `--primary`, `--secondary`, `--muted`, `--accent`, `--destructive` (each with `-foreground`), `--border`, `--input`, `--ring`, `--chart-1..5`, `--sidebar*` and `--radius: 0.625rem` — defined in **oklch**, themed to the legacy palette (`--primary` = indigo-600, `--ring` = sky-500, neutrals = Tailwind gray scale, charts = indigo/sky/green/yellow/pink), with `.dark` overrides. The `@theme inline` block maps each to Tailwind color tokens (`--color-background: var(--background)` etc.) plus radius scale `--radius-sm/md/lg/xl` = radius −4px/−2px/base/+4px, enabling standard shadcn utilities (`bg-background`, `text-muted-foreground`, `border-border`, `rounded-lg`, ...). An `@layer base` block applies `border-border outline-ring/50` to `*` and sets body background/foreground from the shadcn vars — note this **overrides** the earlier gradient `background` on `body` per normal cascade (both declarations exist; the `@layer base` one wins for `background-color`/`color` since it comes later at equal specificity, though un-layered rules beat layered ones — in practice the earlier un-layered `body` rule wins because un-layered styles take precedence over `@layer` styles; be aware both exist when styling).
 
 ### 1.10 Vite (`vite.config.ts`)
 

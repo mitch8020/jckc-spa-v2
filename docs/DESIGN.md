@@ -38,7 +38,7 @@ Schemas are declared with `@Schema({ collection: '...' })` + `@Prop` decorators 
 - Mounting: app created with `NestFactory.create(AppModule, { bodyParser: false })`; JSON/urlencoded
   body parsing re-applied via middleware for everything EXCEPT `api/auth/{*splat}`; better-auth's
   `toNodeHandler(auth)` handles `/api/auth/{*splat}` (ALL methods). `basePath: '/api/auth'`,
-  `baseURL` = BETTER_AUTH_URL (http://localhost:3001), `trustedOrigins: [FRONTEND_ORIGIN]`.
+  `baseURL` = BETTER_AUTH_URL (http://127.0.0.1:3001), `trustedOrigins: [FRONTEND_ORIGIN]`.
 - CORS: `app.enableCors({ origin: FRONTEND_ORIGIN, credentials: true })`.
 - **AuthGuard** (global, with `@Public()` decorator opt-out): resolves session via
   `auth.api.getSession({ headers: fromNodeHeaders(req.headers) })`, attaches `req.user`.
@@ -114,16 +114,18 @@ src/
 
 ## Design direction (frontend)
 
-Commit to the scaffold's existing "seaside kindergarten" design system in `styles.css` —
-tokens `--sea-ink, --sea-ink-soft, --lagoon, --lagoon-deep, --palm, --sand, --foam, --surface,
---surface-strong, --line, --kicker, --bg-base, --chip-*, --hero-*` with **Fraunces** (display
-serif, page titles/kickers) + **Manrope** (body). Aesthetic: warm organic minimalism — soft
-sea-green washes, glassy `--surface` cards with hairline `--line` borders, generous whitespace,
-rounded-2xl geometry, small uppercase Manrope "kicker" labels over Fraunces headings. Playful but
-professional (it's a daycare). Support `.dark` via existing tokens. Staggered page-load reveals
-(CSS animation-delay), subtle hover lifts on cards/rows. NEVER generic: no purple gradients, no
-default zinc-only look — lean on the sea/lagoon/palm palette for identity; shadcn zinc variables
-remain for structural neutrals underneath.
+The design system lives in `styles.css` under the scaffold's original token names
+(`--sea-ink, --sea-ink-soft, --lagoon, --lagoon-deep, --palm, --sand, --foam, --surface,
+--surface-strong, --line, --kicker, --bg-base, --header-*, --chip-*, --hero-*, --age-*`), but the
+**palette mirrors the legacy `jckc-web-app-private` app**: indigo-600 solid header/nav and primary
+actions (`--header-bg`, `--palm`, shadcn `--primary`), sky-500 focus rings (`--ring`), sky-700
+secondary accents (`--lagoon-deep`), gray neutrals on white surfaces, and legacy age-group identity
+colors — infant pink-600, toddler yellow-500, preschool green-500 (`--age-*`, with darkened
+`--age-*-ink` variants for readable pill text on light washes). Typography unchanged: **Fraunces**
+(display serif, page titles/kickers) + **Manrope** (body). Keep the glassy `--surface` cards with
+hairline `--line` borders, generous whitespace, rounded-2xl geometry, uppercase kicker labels over
+Fraunces headings. Support `.dark` via existing tokens (indigo-900 header, gray-950 base, 400-shade
+accents). Staggered page-load reveals (CSS animation-delay), subtle hover lifts on cards/rows.
 
 ## Binding modernization decisions (resolve spec "DECISION NEEDED" items)
 
@@ -207,8 +209,8 @@ remain for structural neutrals underneath.
 
 ## Environment
 
-- Backend `.env`: `MONGO_URI`, `PORT=3001`, `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL=http://localhost:3001`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `FRONTEND_ORIGIN=http://localhost:3000` (+ `.env.example`).
-- Frontend `.env.local`: `VITE_API_URL=http://localhost:3001`.
+- Backend `.env`: `MONGO_URI`, `PORT=3001`, `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL=http://127.0.0.1:3001`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `FRONTEND_ORIGIN=http://127.0.0.1:3000` (+ `.env.example`).
+- Frontend `.env.local`: `VITE_API_URL=http://127.0.0.1:3001`.
 
 ## Testing
 

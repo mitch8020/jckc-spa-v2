@@ -19,12 +19,12 @@ const defaults = {
   dev: {
     backendPort: 3001,
     frontendPort: 3000,
-    host: "localhost",
+    host: "127.0.0.1",
   },
   prod: {
     backendPort: 3001,
     frontendPort: 3000,
-    host: "localhost",
+    host: "127.0.0.1",
   },
 };
 
@@ -34,7 +34,7 @@ function usage() {
       "Usage: node scripts/run-local.mjs --env <dev|prod> --target <backend|frontend|both> [options]",
       "  --backend-port <port>   Default: 3001",
       "  --frontend-port <port>  Default: 3000",
-      "  --host <host>           Default: localhost",
+      "  --host <host>           Default: 127.0.0.1",
       "  --dry-run               Print env updates and commands without writing or starting services",
     ].join("\n"),
   );

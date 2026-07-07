@@ -1,6 +1,6 @@
 # JCKC v2 — REST API Contract (binding for backend AND frontend agents)
 
-Base URL: `http://localhost:3001` (frontend reads `import.meta.env.VITE_API_URL`). All routes below
+Base URL: `http://127.0.0.1:3001` (frontend reads `import.meta.env.VITE_API_URL`). All routes below
 are under the global prefix `/api`. All requests/responses JSON unless noted. Auth = better-auth
 session cookie (`credentials: 'include'` on every fetch). Errors use Nest's default JSON shape
 `{ statusCode, message, error }` — message may be a string array for validation failures.
