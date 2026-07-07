@@ -52,12 +52,16 @@ type StudentStatus = 'active' | 'inactive' | 'all';
 
 @Injectable()
 export class StudentsService {
+  private readonly studentModel: Model<StudentDocument>;
+  private readonly guardianModel: Model<GuardianDocument>;
+
   constructor(
-    @InjectModel(Student.name)
-    private readonly studentModel: Model<StudentDocument>,
-    @InjectModel(Guardian.name)
-    private readonly guardianModel: Model<GuardianDocument>,
-  ) {}
+    @InjectModel(Student.name) studentModel: Model<StudentDocument>,
+    @InjectModel(Guardian.name) guardianModel: Model<GuardianDocument>,
+  ) {
+    this.studentModel = studentModel;
+    this.guardianModel = guardianModel;
+  }
 
   /**
    * Admin/teacher list (students.md §3-R4c semantics, Q6/Q7 fixed):
@@ -343,7 +347,8 @@ export class StudentsService {
       if (!guardian) {
         throw new NotFoundException('Guardian not found');
       }
-      const alreadyLinked = (guardian.students ?? []).some(
+      guardian.students ??= [];
+      const alreadyLinked = guardian.students.some(
         (entry) => entry.student != null && String(entry.student) === idString,
       );
       if (alreadyLinked) {
@@ -356,20 +361,14 @@ export class StudentsService {
       return toGuardianDto(this.studentModel, guardian);
     }
 
-    if (dto.guardian === undefined) {
-      // Unreachable: the exactly-one guard above covers this.
-      throw new BadRequestException(
-        'Provide exactly one of guardianId or guardian',
-      );
-    }
     const created = await this.guardianModel.create({
-      guardianFirstName: dto.guardian.guardianFirstName,
-      guardianLastName: dto.guardian.guardianLastName,
-      phoneNumber: dto.guardian.phoneNumber,
-      guardianStreetAddress: dto.guardian.guardianStreetAddress,
-      guardianCity: dto.guardian.guardianCity,
-      guardianState: dto.guardian.guardianState,
-      guardianZIP: dto.guardian.guardianZIP,
+      guardianFirstName: dto.guardian!.guardianFirstName,
+      guardianLastName: dto.guardian!.guardianLastName,
+      phoneNumber: dto.guardian!.phoneNumber,
+      guardianStreetAddress: dto.guardian!.guardianStreetAddress,
+      guardianCity: dto.guardian!.guardianCity,
+      guardianState: dto.guardian!.guardianState,
+      guardianZIP: dto.guardian!.guardianZIP,
       students: [link],
     });
     return toGuardianDto(this.studentModel, created);

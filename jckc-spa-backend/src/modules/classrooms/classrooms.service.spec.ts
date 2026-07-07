@@ -394,6 +394,25 @@ describe('ClassroomsService', () => {
       ).rejects.toBeInstanceOf(NotFoundException);
       expect(studentModel.countDocuments).not.toHaveBeenCalled();
     });
+
+    it('omits search filters when pane search values are undefined', async () => {
+      classroomModel.findById.mockReturnValue(exec(makeClassroomDoc()));
+      studentModel.countDocuments
+        .mockReturnValueOnce(exec(0))
+        .mockReturnValueOnce(exec(0));
+      studentModel.find
+        .mockReturnValueOnce(mockStudentFindChain([]))
+        .mockReturnValueOnce(mockStudentFindChain([]));
+
+      await service.getRoster(CLASSROOM_ID.toString(), {});
+
+      expect(studentModel.countDocuments).toHaveBeenNthCalledWith(1, {
+        classroom: null,
+      });
+      expect(studentModel.countDocuments).toHaveBeenNthCalledWith(2, {
+        classroom: CLASSROOM_ID,
+      });
+    });
   });
 
   describe('assignStudents', () => {
@@ -479,6 +498,18 @@ describe('ClassroomsService', () => {
       ]);
 
       expect(result).toEqual({ added: 0, notFound: [ID_MISSING] });
+      expect(studentModel.bulkWrite).not.toHaveBeenCalled();
+    });
+
+    it('treats uncastable student ids as notFound without querying students', async () => {
+      classroomModel.findById.mockReturnValue(exec(makeClassroomDoc()));
+
+      const result = await service.assignStudents(CLASSROOM_ID.toString(), [
+        'not-an-object-id',
+      ]);
+
+      expect(result).toEqual({ added: 0, notFound: ['not-an-object-id'] });
+      expect(studentModel.find).not.toHaveBeenCalled();
       expect(studentModel.bulkWrite).not.toHaveBeenCalled();
     });
 

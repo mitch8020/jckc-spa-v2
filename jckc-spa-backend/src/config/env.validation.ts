@@ -7,8 +7,9 @@ const REQUIRED_VARS = [
 
 /**
  * Fail-fast environment validation for ConfigModule.forRoot({ validate }).
- * GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET / ADMIN_EMAILS / PORT are
- * optional (Google sign-in is simply disabled without credentials).
+ * GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET / ADMIN_EMAILS / PORT /
+ * MONGO_DNS_SERVERS are optional (Google sign-in is simply disabled
+ * without credentials).
  */
 export function validate(
   config: Record<string, unknown>,

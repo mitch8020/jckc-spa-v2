@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { validate } from './config/env.validation';
+import { configureMongoSrvDns } from './config/mongo-dns';
 import { AuthModule } from './modules/auth/auth.module';
 import { ClassroomsModule } from './modules/classrooms/classrooms.module';
 import { DashboardModule } from './modules/dashboard/dashboard.module';
@@ -16,9 +17,14 @@ import { UsersModule } from './modules/users/users.module';
     ConfigModule.forRoot({ isGlobal: true, validate }),
     MongooseModule.forRootAsync({
       inject: [ConfigService],
-      useFactory: (config: ConfigService) => ({
-        uri: config.getOrThrow<string>('MONGO_URI'),
-      }),
+      useFactory: async (config: ConfigService) => {
+        const uri = config.getOrThrow<string>('MONGO_URI');
+        await configureMongoSrvDns(
+          uri,
+          config.get<string>('MONGO_DNS_SERVERS'),
+        );
+        return { uri };
+      },
     }),
     AuthModule,
     UsersModule,

@@ -32,13 +32,19 @@ function sumStudentCounts(
 
 @Injectable()
 export class DashboardService {
+  private readonly classroomsService: ClassroomsService;
+  private readonly studentModel: Model<StudentDocument>;
+  private readonly guardianModel: Model<GuardianDocument>;
+
   constructor(
-    private readonly classroomsService: ClassroomsService,
-    @InjectModel(Student.name)
-    private readonly studentModel: Model<StudentDocument>,
-    @InjectModel(Guardian.name)
-    private readonly guardianModel: Model<GuardianDocument>,
-  ) {}
+    classroomsService: ClassroomsService,
+    @InjectModel(Student.name) studentModel: Model<StudentDocument>,
+    @InjectModel(Guardian.name) guardianModel: Model<GuardianDocument>,
+  ) {
+    this.classroomsService = classroomsService;
+    this.studentModel = studentModel;
+    this.guardianModel = guardianModel;
+  }
 
   /**
    * GET /api/dashboard — role-aware content per API-CONTRACT.md.

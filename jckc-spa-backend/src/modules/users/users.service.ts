@@ -31,11 +31,16 @@ const SEARCH_FIELDS = ['name', 'email', 'firstName', 'lastName'] as const;
 
 @Injectable()
 export class UsersService {
+  private readonly userModel: Model<AuthUserDocument>;
+  private readonly configService: ConfigService;
+
   constructor(
-    @InjectModel(AuthUser.name)
-    private readonly userModel: Model<AuthUserDocument>,
-    private readonly configService: ConfigService,
-  ) {}
+    @InjectModel(AuthUser.name) userModel: Model<AuthUserDocument>,
+    configService: ConfigService,
+  ) {
+    this.userModel = userModel;
+    this.configService = configService;
+  }
 
   async getMe(userId: string): Promise<UserDto> {
     if (!isValidObjectId(userId)) {

@@ -389,6 +389,17 @@ describe('StudentsService', () => {
       });
       expect(result).toEqual({ registered: [], pending: [] });
     });
+
+    it('treats guardians with missing students arrays as having no links', async () => {
+      guardianModel.find.mockReturnValue(exec([{ students: undefined }]));
+      studentModel.find.mockReturnValue(makeFindChain([]));
+
+      await service.listMine('user-1');
+
+      expect(studentModel.find).toHaveBeenCalledWith({
+        $or: [{ createdByUserId: 'user-1' }],
+      });
+    });
   });
 
   describe('getById', () => {
@@ -604,6 +615,36 @@ describe('StudentsService', () => {
       expect(result[1].authorizedToPickUp).toBe(false);
     });
 
+    it('skips guardians with missing link arrays and defaults missing link fields', async () => {
+      studentModel.exists.mockReturnValue(exec({ _id: STUDENT_ID }));
+      guardianModel.find.mockReturnValue(
+        makeFindChain([
+          {
+            _id: GUARDIAN_ID,
+            ...makeGuardianFields(),
+            students: undefined,
+          },
+          {
+            _id: OTHER_STUDENT_ID,
+            ...makeGuardianFields(),
+            guardianFirstName: 'Linked',
+            students: [{ student: STUDENT_ID }],
+          },
+        ]),
+      );
+
+      const result = await service.listGuardiansOfStudent(
+        STUDENT_ID.toHexString(),
+      );
+
+      expect(result).toHaveLength(1);
+      expect(result[0]).toMatchObject({
+        guardianFirstName: 'Linked',
+        relationshipToStudent: '',
+        authorizedToPickUp: false,
+      });
+    });
+
     it('throws 404 when the student does not exist', async () => {
       studentModel.exists.mockReturnValue(exec(null));
       await expect(
@@ -716,6 +757,33 @@ describe('StudentsService', () => {
       });
     });
 
+    it('appends to an existing guardian whose legacy students array is missing', async () => {
+      studentModel.findById.mockReturnValue(exec(makeStudentDoc()));
+      const guardianDoc = {
+        _id: GUARDIAN_ID,
+        ...makeGuardianFields(),
+        createdAt: new Date('2026-02-01T00:00:00.000Z'),
+        students: undefined as unknown as unknown[],
+        save: jest.fn(),
+      };
+      guardianDoc.save.mockResolvedValue(guardianDoc);
+      guardianModel.findById.mockReturnValue(exec(guardianDoc));
+      studentModel.find.mockReturnValue(makeFindChain([]));
+
+      await service.addGuardianToStudent(STUDENT_ID.toHexString(), {
+        guardianId: GUARDIAN_ID.toHexString(),
+        ...linkFields,
+      });
+
+      expect(guardianDoc.students).toEqual([
+        {
+          student: STUDENT_ID,
+          relationshipToStudent: 'Grandmother',
+          authorizedToPickUp: false,
+        },
+      ]);
+    });
+
     it('creates a new guardian with the initial link', async () => {
       studentModel.findById.mockReturnValue(exec(makeStudentDoc()));
       const created = {
@@ -770,6 +838,30 @@ describe('StudentsService', () => {
           ...linkFields,
         }),
       ).rejects.toBeInstanceOf(NotFoundException);
+    });
+
+    it('throws 404 when the student does not exist', async () => {
+      studentModel.findById.mockReturnValue(exec(null));
+
+      await expect(
+        service.addGuardianToStudent(STUDENT_ID.toHexString(), {
+          guardianId: GUARDIAN_ID.toHexString(),
+          ...linkFields,
+        }),
+      ).rejects.toBeInstanceOf(NotFoundException);
+      expect(guardianModel.findById).not.toHaveBeenCalled();
+    });
+
+    it('throws 404 for a malformed guardianId after confirming the student exists', async () => {
+      studentModel.findById.mockReturnValue(exec(makeStudentDoc()));
+
+      await expect(
+        service.addGuardianToStudent(STUDENT_ID.toHexString(), {
+          guardianId: 'not-an-object-id',
+          ...linkFields,
+        }),
+      ).rejects.toBeInstanceOf(NotFoundException);
+      expect(guardianModel.findById).not.toHaveBeenCalled();
     });
   });
 });

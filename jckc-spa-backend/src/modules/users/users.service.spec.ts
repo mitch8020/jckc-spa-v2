@@ -122,6 +122,37 @@ describe('UsersService', () => {
         NotFoundException,
       );
     });
+
+    it('serializes missing optional legacy fields with empty/null fallbacks', async () => {
+      userModel.findById.mockReturnValue(
+        exec(
+          makeUserDoc({
+            image: undefined,
+            role: undefined,
+            registrationStatus: undefined,
+            firstName: undefined,
+            lastName: undefined,
+            phoneNumber: undefined,
+            dateOfBirth: undefined,
+            createdAt: 'legacy-string-date',
+          }),
+        ),
+      );
+
+      await expect(service.getMe(USER_ID.toString())).resolves.toEqual({
+        id: USER_ID.toString(),
+        email: 'jane@example.com',
+        name: 'Jane Doe',
+        image: null,
+        role: '',
+        registrationStatus: false,
+        firstName: '',
+        lastName: '',
+        phoneNumber: '',
+        dateOfBirth: '',
+        createdAt: '',
+      });
+    });
   });
 
   describe('updateMe', () => {
@@ -141,6 +172,52 @@ describe('UsersService', () => {
       expect(update.$set).not.toHaveProperty('dateOfBirth');
       expect(update.$set).not.toHaveProperty('phoneNumber');
       expect(options).toEqual({ returnDocument: 'after' });
+    });
+
+    it('sets every optional profile field when submitted', async () => {
+      userModel.findByIdAndUpdate.mockReturnValue(
+        exec(
+          makeUserDoc({
+            firstName: 'Jane',
+            lastName: 'Doe',
+            dateOfBirth: '1990-04-05',
+            phoneNumber: '423-555-1212',
+          }),
+        ),
+      );
+
+      await service.updateMe(USER_ID.toString(), {
+        firstName: 'Jane',
+        lastName: 'Doe',
+        dateOfBirth: '1990-04-05',
+        phoneNumber: '423-555-1212',
+      });
+
+      const [, update] = userModel.findByIdAndUpdate.mock.calls[0] as [
+        string,
+        { $set: Record<string, unknown> },
+      ];
+      expect(update.$set).toMatchObject({
+        firstName: 'Jane',
+        lastName: 'Doe',
+        dateOfBirth: '1990-04-05',
+        phoneNumber: '423-555-1212',
+      });
+    });
+
+    it('throws 404 for a malformed id without querying', async () => {
+      await expect(
+        service.updateMe('not-an-object-id', { firstName: 'Jane' }),
+      ).rejects.toBeInstanceOf(NotFoundException);
+      expect(userModel.findByIdAndUpdate).not.toHaveBeenCalled();
+    });
+
+    it('throws 404 when the profile update target is gone', async () => {
+      userModel.findByIdAndUpdate.mockReturnValue(exec(null));
+
+      await expect(
+        service.updateMe(USER_ID.toString(), { firstName: 'Jane' }),
+      ).rejects.toBeInstanceOf(NotFoundException);
     });
   });
 
@@ -227,6 +304,28 @@ describe('UsersService', () => {
         service.register(makeSessionUser({ registrationStatus: true }), dto),
       ).rejects.toBeInstanceOf(ConflictException);
       expect(userModel.findOneAndUpdate).not.toHaveBeenCalled();
+    });
+
+    it('throws 404 for a malformed authenticated user id', async () => {
+      await expect(
+        service.register(makeSessionUser({ id: 'not-an-object-id' }), dto),
+      ).rejects.toBeInstanceOf(NotFoundException);
+      expect(userModel.findOneAndUpdate).not.toHaveBeenCalled();
+    });
+
+    it('uses requested role when ADMIN_EMAILS is not configured', async () => {
+      configGet.mockReturnValue(undefined);
+      userModel.findOneAndUpdate.mockReturnValue(
+        exec(makeUserDoc({ role: 'teacher', registrationStatus: true })),
+      );
+
+      await service.register(makeSessionUser(), { ...dto, role: 'teacher' });
+
+      const [, update] = userModel.findOneAndUpdate.mock.calls[0] as [
+        unknown,
+        { $set: Record<string, unknown> },
+      ];
+      expect(update.$set.role).toBe('teacher');
     });
 
     it('throws 409 when the atomic update loses the race but the user exists', async () => {

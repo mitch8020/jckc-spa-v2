@@ -110,6 +110,26 @@ describe('GuardiansService', () => {
       ]);
     });
 
+    it('uses empty fallbacks for schemaless lite guardian rows', async () => {
+      guardianModel.find.mockReturnValue(
+        queryOf([
+          {
+            _id: GUARDIAN_ID,
+            students: undefined,
+          },
+        ]),
+      );
+
+      await expect(service.list()).resolves.toEqual([
+        {
+          id: GUARDIAN_ID.toString(),
+          guardianFirstName: '',
+          guardianLastName: '',
+          studentIds: [],
+        },
+      ]);
+    });
+
     it('sorts by first name with the case-insensitive collation, last name and _id tiebreakers', async () => {
       const chain = queryOf([]);
       guardianModel.find.mockReturnValue(chain);
@@ -438,6 +458,86 @@ describe('GuardiansService', () => {
         { $set: Record<string, unknown> },
       ];
       expect(update.$set).not.toHaveProperty('students');
+    });
+
+    it('treats a missing students array as empty during link edits', async () => {
+      guardianModel.findById.mockReturnValue(
+        queryOf(makeGuardianDoc({ students: undefined })),
+      );
+      guardianModel.collection.updateOne.mockResolvedValue(updateResult);
+
+      await service.update(GUARDIAN_ID.toString(), {
+        ...baseDto,
+        links: [
+          {
+            studentId: STUDENT_A.toString(),
+            relationshipToStudent: 'Mother',
+            authorizedToPickUp: true,
+          },
+        ],
+      });
+
+      const [, update] = guardianModel.collection.updateOne.mock.calls[0] as [
+        unknown,
+        { $set: Record<string, unknown> },
+      ];
+      expect(update.$set).not.toHaveProperty('students');
+      expect(studentModel.find).not.toHaveBeenCalled();
+    });
+
+    it('preserves null-student links when rebuilding editable links', async () => {
+      const nullLink = {
+        student: null,
+        relationshipToStudent: 'Unknown',
+        authorizedToPickUp: false,
+      };
+      guardianModel.findById.mockReturnValue(
+        queryOf(
+          makeGuardianDoc({
+            students: [
+              nullLink,
+              {
+                student: STUDENT_A,
+                relationshipToStudent: 'Mother',
+                authorizedToPickUp: true,
+              },
+            ],
+          }),
+        ),
+      );
+      guardianModel.collection.updateOne.mockResolvedValue(updateResult);
+      studentModel.find.mockReturnValue(
+        queryOf([makeStudentDoc(STUDENT_A, 'Ada', 'Smith')]),
+      );
+
+      await service.update(GUARDIAN_ID.toString(), {
+        ...baseDto,
+        links: [
+          {
+            studentId: STUDENT_A.toString(),
+            relationshipToStudent: 'Guardian',
+            authorizedToPickUp: false,
+          },
+        ],
+      });
+
+      const [, update] = guardianModel.collection.updateOne.mock.calls[0] as [
+        unknown,
+        { $set: { students: unknown[] } },
+      ];
+      expect(update.$set.students[0]).toBe(nullLink);
+    });
+
+    it('throws 404 when the raw update loses the guardian after the read', async () => {
+      guardianModel.findById.mockReturnValue(queryOf(makeGuardianDoc()));
+      guardianModel.collection.updateOne.mockResolvedValue({
+        matchedCount: 0,
+        modifiedCount: 0,
+      });
+
+      await expect(
+        service.update(GUARDIAN_ID.toString(), baseDto),
+      ).rejects.toBeInstanceOf(NotFoundException);
     });
 
     it('returns the refreshed GuardianDto', async () => {

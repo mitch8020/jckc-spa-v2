@@ -11,7 +11,7 @@ connection).
 ```bash
 npm install
 cp .env.example .env   # then fill in BETTER_AUTH_SECRET (see below)
-npm run start:dev      # http://localhost:3001/api/health
+npm run start:dev      # http://127.0.0.1:3001/api/health
 ```
 
 Requires a MongoDB instance (default `mongodb://localhost:27017/jckc-v2`).
@@ -23,9 +23,10 @@ Domain collections keep the legacy names/fields (`students`, `classrooms`,
 | Var | Required | Purpose |
 |---|---|---|
 | `MONGO_URI` | yes | MongoDB connection string |
+| `MONGO_DNS_SERVERS` | no | Optional comma-separated DNS servers for Atlas `mongodb+srv://` SRV lookups when local DNS refuses them |
 | `BETTER_AUTH_SECRET` | yes | Session signing secret — `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"` |
-| `BETTER_AUTH_URL` | yes | Backend base URL (`http://localhost:3001`) |
-| `FRONTEND_ORIGIN` | yes | CORS + trusted origin (`http://localhost:3000`) |
+| `BETTER_AUTH_URL` | yes | Backend base URL (`http://127.0.0.1:3001`) |
+| `FRONTEND_ORIGIN` | yes | CORS + trusted origin (`http://127.0.0.1:3000`) |
 | `PORT` | no | Defaults to 3001 |
 | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | no | Enables Google sign-in when both set |
 | `ADMIN_EMAILS` | no | Comma-separated emails that register as admin (bootstrap) |

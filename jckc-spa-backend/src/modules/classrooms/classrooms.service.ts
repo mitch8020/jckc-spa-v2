@@ -53,12 +53,16 @@ export interface RemoveResultDto {
 
 @Injectable()
 export class ClassroomsService {
+  private readonly classroomModel: Model<ClassroomDocument>;
+  private readonly studentModel: Model<StudentDocument>;
+
   constructor(
-    @InjectModel(Classroom.name)
-    private readonly classroomModel: Model<ClassroomDocument>,
-    @InjectModel(Student.name)
-    private readonly studentModel: Model<StudentDocument>,
-  ) {}
+    @InjectModel(Classroom.name) classroomModel: Model<ClassroomDocument>,
+    @InjectModel(Student.name) studentModel: Model<StudentDocument>,
+  ) {
+    this.classroomModel = classroomModel;
+    this.studentModel = studentModel;
+  }
 
   /**
    * GET /api/classrooms — every classroom with its student count. Counts

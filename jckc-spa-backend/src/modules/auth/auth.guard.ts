@@ -19,10 +19,13 @@ import type { RequestWithUser, SessionUser } from './session-user.type';
  */
 @Injectable()
 export class AuthGuard implements CanActivate {
-  constructor(
-    private readonly reflector: Reflector,
-    @Inject(AUTH_INSTANCE) private readonly auth: AuthInstance,
-  ) {}
+  private readonly reflector: Reflector;
+  private readonly auth: AuthInstance;
+
+  constructor(reflector: Reflector, @Inject(AUTH_INSTANCE) auth: AuthInstance) {
+    this.reflector = reflector;
+    this.auth = auth;
+  }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [

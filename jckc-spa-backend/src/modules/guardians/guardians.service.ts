@@ -53,12 +53,16 @@ type RawGuardian = {
 
 @Injectable()
 export class GuardiansService {
+  private readonly guardianModel: Model<GuardianDocument>;
+  private readonly studentModel: Model<StudentDocument>;
+
   constructor(
-    @InjectModel(Guardian.name)
-    private readonly guardianModel: Model<GuardianDocument>,
-    @InjectModel(Student.name)
-    private readonly studentModel: Model<StudentDocument>,
-  ) {}
+    @InjectModel(Guardian.name) guardianModel: Model<GuardianDocument>,
+    @InjectModel(Student.name) studentModel: Model<StudentDocument>,
+  ) {
+    this.guardianModel = guardianModel;
+    this.studentModel = studentModel;
+  }
 
   /**
    * GET /api/guardians — lite list for the "add guardian to student"

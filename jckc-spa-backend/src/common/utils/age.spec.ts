@@ -50,6 +50,13 @@ describe('calcAgeGroup', () => {
     expect(calcAgeGroup('not-a-date', NOW)).toBe('preschool');
     expect(calcAgeGroup('', NOW)).toBe('preschool');
   });
+
+  it('uses the current date when now is omitted', () => {
+    jest.useFakeTimers();
+    jest.setSystemTime(NOW);
+    expect(calcAgeGroup(dobDaysAgo(0))).toBe('infant');
+    jest.useRealTimers();
+  });
 });
 
 describe('convertAge', () => {
@@ -86,6 +93,13 @@ describe('convertAge', () => {
   it('a 5-year-old is "60 months old"', () => {
     expect(convertAge(dobDaysAgo(365 * 5), NOW)).toBe('60 months old');
   });
+
+  it('uses the current date when now is omitted', () => {
+    jest.useFakeTimers();
+    jest.setSystemTime(NOW);
+    expect(convertAge(dobDaysAgo(8))).toBe('1 week old');
+    jest.useRealTimers();
+  });
 });
 
 describe('formatDateString', () => {
@@ -108,6 +122,13 @@ describe('formatToday', () => {
 
   it('keeps double-digit parts intact', () => {
     expect(formatToday(new Date(2026, 11, 25))).toBe('12/25/2026');
+  });
+
+  it('uses the current date when now is omitted', () => {
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date(2026, 6, 7, 12, 0, 0));
+    expect(formatToday()).toBe('7/7/2026');
+    jest.useRealTimers();
   });
 });
 

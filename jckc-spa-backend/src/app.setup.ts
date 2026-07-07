@@ -4,6 +4,7 @@ import type { NestExpressApplication } from '@nestjs/platform-express';
 import { toNodeHandler } from 'better-auth/node';
 import express from 'express';
 import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
+import { resolveFrontendOrigins } from './config/frontend-origins';
 import { AUTH_INSTANCE } from './modules/auth/auth.provider';
 import type { AuthInstance } from './modules/auth/auth.provider';
 
@@ -17,9 +18,12 @@ import type { AuthInstance } from './modules/auth/auth.provider';
  */
 export function configureApp(app: NestExpressApplication): void {
   const config = app.get(ConfigService);
+  const frontendOrigins = resolveFrontendOrigins(
+    config.getOrThrow<string>('FRONTEND_ORIGIN'),
+  );
 
   app.enableCors({
-    origin: config.getOrThrow<string>('FRONTEND_ORIGIN'),
+    origin: frontendOrigins,
     credentials: true,
   });
 

@@ -48,12 +48,16 @@ const REPORT_FONTS: TFontDictionary = {
  */
 @Injectable()
 export class ReportsService {
+  private readonly classroomModel: Model<ClassroomDocument>;
+  private readonly studentModel: Model<StudentDocument>;
+
   constructor(
-    @InjectModel(Classroom.name)
-    private readonly classroomModel: Model<ClassroomDocument>,
-    @InjectModel(Student.name)
-    private readonly studentModel: Model<StudentDocument>,
-  ) {}
+    @InjectModel(Classroom.name) classroomModel: Model<ClassroomDocument>,
+    @InjectModel(Student.name) studentModel: Model<StudentDocument>,
+  ) {
+    this.classroomModel = classroomModel;
+    this.studentModel = studentModel;
+  }
 
   async generateSignInSheet(): Promise<Buffer> {
     const { classrooms, students } = await this.loadReportData();

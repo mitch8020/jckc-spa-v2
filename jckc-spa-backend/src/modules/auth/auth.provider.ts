@@ -6,6 +6,7 @@ import type { Auth } from 'better-auth';
 import { mongodbAdapter } from 'better-auth/adapters/mongodb';
 import type { Db } from 'mongodb';
 import type { Connection } from 'mongoose';
+import { resolveFrontendOrigins } from '../../config/frontend-origins';
 
 /** Injection token for the better-auth instance. */
 export const AUTH_INSTANCE = 'AUTH_INSTANCE';
@@ -40,7 +41,9 @@ export function createAuth(
     baseURL: config.getOrThrow<string>('BETTER_AUTH_URL'),
     basePath: '/api/auth',
     secret: config.getOrThrow<string>('BETTER_AUTH_SECRET'),
-    trustedOrigins: [config.getOrThrow<string>('FRONTEND_ORIGIN')],
+    trustedOrigins: resolveFrontendOrigins(
+      config.getOrThrow<string>('FRONTEND_ORIGIN'),
+    ),
     emailAndPassword: { enabled: true },
     socialProviders,
     user: {
