@@ -1,11 +1,15 @@
 import {
   HeadContent,
+  Link,
   Scripts,
   createRootRouteWithContext,
 } from '@tanstack/react-router'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { TanStackDevtools } from '@tanstack/react-devtools'
+import { HomeIcon, SearchXIcon } from 'lucide-react'
 import { ThemeProvider } from 'next-themes'
+import { EmptyState } from '#/components/EmptyState'
+import { Button } from '#/components/ui/button'
 import { Toaster } from '#/components/ui/sonner'
 import type { QueryClient } from '@tanstack/react-query'
 
@@ -48,8 +52,30 @@ export const Route = createRootRouteWithContext<RouterContext>()({
       },
     ],
   }),
+  notFoundComponent: RootNotFound,
   shellComponent: RootDocument,
 })
+
+function RootNotFound() {
+  return (
+    <main className="page-wrap flex min-h-screen items-center justify-center py-12">
+      <div className="island-shell w-full max-w-xl rounded-3xl">
+        <EmptyState
+          icon={SearchXIcon}
+          title="Page not found"
+          message="The page you're looking for isn't available."
+          action={
+            <Button asChild>
+              <Link to="/">
+                <HomeIcon /> Go home
+              </Link>
+            </Button>
+          }
+        />
+      </div>
+    </main>
+  )
+}
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (

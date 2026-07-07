@@ -157,7 +157,7 @@ export function AppShell({
             className="flex flex-col no-underline"
             aria-label="JCKC dashboard"
           >
-            <span className="display-title text-xl leading-none font-bold text-[var(--sea-ink)]">
+            <span className="display-title text-xl leading-none font-bold text-[var(--header-ink)]">
               JCKC
             </span>
             <span className="island-kicker text-[0.56rem]">Kidz Clubhouse</span>
@@ -192,7 +192,7 @@ export function AppShell({
                   aria-label="Account menu"
                   className="rounded-full outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
                 >
-                  <Avatar className="size-9 border border-[var(--line)]">
+                  <Avatar className="size-9 border border-white/30">
                     {user.image ? (
                       <AvatarImage src={user.image} alt="" />
                     ) : null}

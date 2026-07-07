@@ -312,7 +312,7 @@ function UnresolvedLinksPanel({ links }: { links: GuardianLinkDto[] }) {
       <div className="flex items-start gap-3">
         <TriangleAlertIcon
           className="mt-0.5 size-5 shrink-0"
-          style={{ color: 'var(--age-toddler)' }}
+          style={{ color: 'var(--age-toddler-ink)' }}
           aria-hidden
         />
         <div className="min-w-0 flex-1">
