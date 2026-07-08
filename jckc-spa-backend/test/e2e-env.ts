@@ -17,6 +17,10 @@ export async function startTestEnvironment(): Promise<MongoMemoryServer> {
     'e2e-test-secret-0123456789abcdef0123456789abcdef';
   process.env.BETTER_AUTH_URL = 'http://localhost:3001';
   process.env.FRONTEND_ORIGIN = 'http://localhost:3000';
+  process.env.GOOGLE_CLIENT_ID = 'google-client-id';
+  process.env.GOOGLE_CLIENT_SECRET = 'google-client-secret';
+  process.env.AUTH_ALLOWED_EMAILS =
+    'pat.parent@example.com,mallory@example.com,ada.admin@example.com,newt.user@example.com';
   process.env.ADMIN_EMAILS = '';
   return mongod;
 }

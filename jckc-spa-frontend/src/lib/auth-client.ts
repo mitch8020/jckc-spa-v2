@@ -1,5 +1,6 @@
 import { createAuthClient } from 'better-auth/react'
 import { inferAdditionalFields } from 'better-auth/client/plugins'
+import { getApiBaseUrl } from '#/lib/api-url'
 
 /**
  * better-auth React client, pointed at the NestJS backend (which hosts
@@ -7,7 +8,7 @@ import { inferAdditionalFields } from 'better-auth/client/plugins'
  * cross-origin (3000 → 3001), so every call includes credentials.
  */
 export const authClient = createAuthClient({
-  baseURL: import.meta.env.VITE_API_URL as string,
+  baseURL: getApiBaseUrl(),
   plugins: [
     inferAdditionalFields({
       user: {

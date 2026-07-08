@@ -1,16 +1,17 @@
 /**
- * Maps legacy `users` collection docs (Passport/Google era, core.md §7.1)
- * to better-auth `user` + `account` documents (DESIGN.md decision 13).
+ * Normalizes legacy `users` collection docs (Passport/Google era, core.md
+ * section 7.1) in place for better-auth, then creates matching `account`
+ * documents.
  *
  * - googleId            -> account { providerId: 'google', accountId }
- * - accountType         -> user.role
- * - firstNameApp/...    -> user.firstName / lastName / phoneNumber / dateOfBirth
- * - emailAddress ('' allowed) -> user.email, or placeholder
+ * - accountType         -> users.role
+ * - firstNameApp/...    -> users.firstName / lastName / phoneNumber / dateOfBirth
+ * - emailAddress        -> users.email, or placeholder
  *   `legacy-<_id>@placeholder.invalid` with a warning.
  *
- * Idempotent: already-migrated users (matching google account, or user doc
- * with the same _id/email) are skipped or completed (missing account doc
- * added). Nothing is ever deleted.
+ * Idempotent: already-normalized fields are preserved, existing google
+ * accounts are skipped, and missing account docs are added. Nothing is ever
+ * deleted, and this script never writes to a singular `user` collection.
  *
  * Usage:
  *   npm run migrate:users -- --dry-run
@@ -19,7 +20,7 @@
 import mongoose from 'mongoose';
 import { loadEnv, parseMode } from './load-env';
 
-interface LegacyUser {
+interface UserCollectionDoc {
   _id: mongoose.mongo.ObjectId;
   googleId?: string;
   displayName?: string;
@@ -31,20 +32,111 @@ interface LegacyUser {
   phoneNumber?: string;
   emailAddress?: string;
   accountType?: string;
-  image?: string;
+  image?: string | null;
   createdAt?: Date;
+  updatedAt?: Date;
   parentPermission?: boolean;
   teacherPermission?: boolean;
   adminPermission?: boolean;
   registrationStatus?: boolean;
+  name?: string;
+  email?: string;
+  emailVerified?: boolean;
+  role?: string;
+  firstName?: string;
+  lastName?: string;
 }
 
 interface Action {
-  type: 'create-user-and-account' | 'create-missing-account' | 'skip';
-  legacyId: string;
+  type:
+    | 'update-user-and-create-account'
+    | 'update-user'
+    | 'create-missing-account'
+    | 'skip';
+  userId: string;
   email: string;
   role: string;
   reason?: string;
+  updatedFields?: string[];
+}
+
+function firstNonEmpty(...values: Array<string | undefined>): string {
+  return values.map((value) => value?.trim() ?? '').find(Boolean) ?? '';
+}
+
+function setIfMissing(
+  target: Record<string, unknown>,
+  doc: UserCollectionDoc,
+  field: keyof UserCollectionDoc,
+  value: unknown,
+): void {
+  const current = doc[field];
+  if (
+    current === undefined ||
+    current === null ||
+    (typeof current === 'string' && current.trim() === '')
+  ) {
+    target[field] = value;
+  }
+}
+
+function buildUserUpdate(
+  user: UserCollectionDoc,
+  email: string,
+  now: Date,
+): Record<string, unknown> {
+  const update: Record<string, unknown> = {};
+  const firstName = firstNonEmpty(user.firstName, user.firstNameApp);
+  const lastName = firstNonEmpty(user.lastName, user.lastNameApp);
+  const name = firstNonEmpty(
+    user.name,
+    user.displayName,
+    [user.firstNameGoog, user.lastNameGoog].filter(Boolean).join(' '),
+    [firstName, lastName].filter(Boolean).join(' '),
+    email,
+  );
+
+  setIfMissing(update, user, 'name', name);
+  setIfMissing(update, user, 'email', email);
+  setIfMissing(update, user, 'image', user.image ?? null);
+  setIfMissing(update, user, 'firstName', firstName);
+  setIfMissing(update, user, 'lastName', lastName);
+  setIfMissing(update, user, 'phoneNumber', user.phoneNumber ?? '');
+  setIfMissing(update, user, 'dateOfBirth', user.dateOfBirth ?? '');
+
+  if (typeof user.emailVerified !== 'boolean') {
+    update.emailVerified = false;
+  }
+  if (!(user.createdAt instanceof Date)) {
+    update.createdAt = now;
+  }
+  if (!(user.updatedAt instanceof Date)) {
+    update.updatedAt = now;
+  }
+  if (!user.role && user.accountType) {
+    update.role = user.accountType;
+  }
+  if (user.registrationStatus === undefined) {
+    update.registrationStatus = false;
+  }
+  if (user.parentPermission === undefined) {
+    update.parentPermission = false;
+  }
+  if (user.teacherPermission === undefined) {
+    update.teacherPermission = false;
+  }
+  if (user.adminPermission === undefined) {
+    update.adminPermission = false;
+  }
+
+  const changedFields = Object.keys(update).filter(
+    (field) => field !== 'updatedAt',
+  );
+  if (changedFields.length > 0 && !('updatedAt' in update)) {
+    update.updatedAt = now;
+  }
+
+  return update;
 }
 
 async function main(): Promise<void> {
@@ -63,37 +155,62 @@ async function main(): Promise<void> {
     throw new Error('Mongoose connection has no db handle');
   }
 
-  const legacyUsersCol = db.collection<LegacyUser>('users');
-  const userCol = db.collection('user');
+  const usersCol = db.collection<UserCollectionDoc>('users');
   const accountCol = db.collection('account');
 
-  const legacyUsers = await legacyUsersCol.find({}).toArray();
+  const users = await usersCol.find({}).toArray();
   const actions: Action[] = [];
   const warnings: string[] = [];
-  let created = 0;
+  let usersUpdated = 0;
   let accountsAdded = 0;
   let skipped = 0;
 
-  for (const legacy of legacyUsers) {
-    const legacyId = legacy._id.toString();
-    const googleId = (legacy.googleId ?? '').trim();
-    let email = (legacy.emailAddress ?? '').trim().toLowerCase();
+  for (const user of users) {
+    const userId = user._id.toString();
+    const googleId = (user.googleId ?? '').trim();
+    let email = firstNonEmpty(user.email, user.emailAddress).toLowerCase();
     if (!email) {
-      email = `legacy-${legacyId}@placeholder.invalid`;
+      email = `legacy-${userId}@placeholder.invalid`;
       warnings.push(
-        `legacy user ${legacyId} (${legacy.displayName ?? 'unnamed'}) has no emailAddress — assigned placeholder ${email}`,
+        `user ${userId} (${user.displayName ?? 'unnamed'}) has no email/emailAddress; assigned placeholder ${email}`,
       );
     }
+
+    const now = new Date();
+    const userUpdate = buildUserUpdate(user, email, now);
+    const updatedFields = Object.keys(userUpdate).sort();
+    const role = user.role || user.accountType || '';
+
+    if (updatedFields.length > 0) {
+      if (mode === 'write') {
+        await usersCol.updateOne({ _id: user._id }, { $set: userUpdate });
+      }
+      usersUpdated += 1;
+    }
+
     if (!googleId) {
-      warnings.push(`legacy user ${legacyId} has no googleId — skipped`);
-      actions.push({
-        type: 'skip',
-        legacyId,
-        email,
-        role: legacy.accountType ?? '',
-        reason: 'missing googleId',
-      });
-      skipped += 1;
+      if (updatedFields.length > 0) {
+        warnings.push(
+          `user ${userId} has no googleId; normalized user fields only`,
+        );
+        actions.push({
+          type: 'update-user',
+          userId,
+          email,
+          role,
+          reason: 'missing googleId',
+          updatedFields,
+        });
+      } else {
+        actions.push({
+          type: 'skip',
+          userId,
+          email,
+          role,
+          reason: 'missing googleId',
+        });
+        skipped += 1;
+      }
       continue;
     }
 
@@ -103,96 +220,48 @@ async function main(): Promise<void> {
     });
     if (existingAccount) {
       actions.push({
-        type: 'skip',
-        legacyId,
+        type: updatedFields.length > 0 ? 'update-user' : 'skip',
+        userId,
         email,
-        role: legacy.accountType ?? '',
+        role,
         reason: 'google account already migrated',
+        ...(updatedFields.length > 0 ? { updatedFields } : {}),
       });
-      skipped += 1;
-      continue;
-    }
-
-    // Find (or plan) the target better-auth user doc.
-    let targetUserId: mongoose.mongo.ObjectId | null = null;
-    const existingById = await userCol.findOne({ _id: legacy._id });
-    if (existingById) {
-      targetUserId = legacy._id;
-    } else {
-      const existingByEmail = await userCol.findOne({ email });
-      if (existingByEmail) {
-        targetUserId = existingByEmail._id;
-        warnings.push(
-          `legacy user ${legacyId}: better-auth user already exists for ${email} — linking google account to it`,
-        );
+      if (updatedFields.length === 0) {
+        skipped += 1;
       }
-    }
-
-    const now = new Date();
-    if (targetUserId) {
-      actions.push({
-        type: 'create-missing-account',
-        legacyId,
-        email,
-        role: legacy.accountType ?? '',
-      });
-      if (mode === 'write') {
-        await accountCol.insertOne({
-          _id: new mongoose.mongo.ObjectId(),
-          accountId: googleId,
-          providerId: 'google',
-          userId: targetUserId,
-          createdAt: legacy.createdAt ?? now,
-          updatedAt: now,
-        });
-      }
-      accountsAdded += 1;
       continue;
     }
 
     actions.push({
-      type: 'create-user-and-account',
-      legacyId,
+      type:
+        updatedFields.length > 0
+          ? 'update-user-and-create-account'
+          : 'create-missing-account',
+      userId,
       email,
-      role: legacy.accountType ?? '',
+      role,
+      ...(updatedFields.length > 0 ? { updatedFields } : {}),
     });
     if (mode === 'write') {
-      await userCol.insertOne({
-        _id: legacy._id, // reuse the legacy id for traceability
-        name: legacy.displayName ?? '',
-        email,
-        emailVerified: false,
-        image: legacy.image ?? null,
-        createdAt: legacy.createdAt ?? now,
-        updatedAt: now,
-        role: legacy.accountType ?? '',
-        registrationStatus: legacy.registrationStatus === true,
-        firstName: legacy.firstNameApp ?? '',
-        lastName: legacy.lastNameApp ?? '',
-        phoneNumber: legacy.phoneNumber ?? '',
-        dateOfBirth: legacy.dateOfBirth ?? '',
-        parentPermission: legacy.parentPermission === true,
-        teacherPermission: legacy.teacherPermission === true,
-        adminPermission: legacy.adminPermission === true,
-      });
       await accountCol.insertOne({
         _id: new mongoose.mongo.ObjectId(),
         accountId: googleId,
         providerId: 'google',
-        userId: legacy._id,
-        createdAt: legacy.createdAt ?? now,
+        userId: user._id,
+        createdAt: user.createdAt ?? now,
         updatedAt: now,
       });
     }
-    created += 1;
+    accountsAdded += 1;
   }
 
   const report = {
     mode,
     summary: {
-      totalLegacyUsers: legacyUsers.length,
-      usersCreated: created,
-      accountsAddedToExistingUsers: accountsAdded,
+      totalUsers: users.length,
+      usersUpdated,
+      accountsAdded,
       skipped,
       warnings: warnings.length,
     },

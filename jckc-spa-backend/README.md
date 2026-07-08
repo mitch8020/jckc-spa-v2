@@ -16,7 +16,8 @@ npm run start:dev      # http://127.0.0.1:3001/api/health
 
 Requires a MongoDB instance (default `mongodb://localhost:27017/jckc-v2`).
 Domain collections keep the legacy names/fields (`students`, `classrooms`,
-`guardians`); better-auth owns `user`, `account`, `session`.
+`guardians`); better-auth uses the existing `users` collection for auth users
+and owns `account` and `session`.
 
 ## Environment variables (.env)
 
@@ -29,7 +30,17 @@ Domain collections keep the legacy names/fields (`students`, `classrooms`,
 | `FRONTEND_ORIGIN` | yes | CORS + trusted origin (`http://127.0.0.1:3000`) |
 | `PORT` | no | Defaults to 3001 |
 | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | no | Enables Google sign-in when both set |
+| `AUTH_ALLOWED_EMAILS` | no | Comma-separated emails allowed to authenticate; defaults to `jpmitra.swe@gmail.com,mitrajs@yahoo.com,khinson60@yahoo.com` |
 | `ADMIN_EMAILS` | no | Comma-separated emails that register as admin (bootstrap) |
+
+For local Google OAuth, add both loopback callback URIs in Google Cloud
+Console's **Authorized redirect URIs**. The app supports either host so the
+state cookie and OAuth callback stay on the same host as the browser session:
+
+```text
+http://localhost:3001/api/auth/callback/google
+http://127.0.0.1:3001/api/auth/callback/google
+```
 
 Config is validated at boot (`src/config/env.validation.ts`) — the app
 fails fast when a required var is missing.
@@ -43,7 +54,7 @@ fails fast when a required var is missing.
 | `npm test` | Unit tests (`src/**/*.spec.ts`) |
 | `npm run test:e2e` | E2E tests (boots AppModule on mongodb-memory-server) |
 | `npm run lint` | ESLint (typescript-eslint typeChecked + prettier) |
-| `npm run migrate:users -- --dry-run\|--write` | Legacy `users` collection → better-auth `user`+`account` docs |
+| `npm run migrate:users -- --dry-run\|--write` | Normalize existing `users` docs in place and add better-auth `account` docs |
 | `npm run migrate:guardian-links -- --dry-run\|--write` | Cast string `students[].student` ids on guardians to ObjectIds |
 
 ## Architecture map
@@ -67,7 +78,7 @@ src/
                              # pagination.ts (legacy page-size-10 math), escape-regex.ts
     validators/              # @IsDateOfBirth (YYYY-MM-DD, real date, not future)
   database/schemas/          # Student / Classroom / Guardian (legacy-compatible) + AuthUser
-                             # (mongoose view over better-auth's 'user' collection)
+                             # (mongoose view over better-auth's 'users' collection)
   modules/
     auth/                    # better-auth instance provider (AUTH_INSTANCE), global
                              # AuthGuard (session -> req.user), SessionUser type

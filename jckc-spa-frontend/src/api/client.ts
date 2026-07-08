@@ -1,4 +1,6 @@
-const BASE_URL = import.meta.env.VITE_API_URL as string
+import { getApiBaseUrl } from '#/lib/api-url'
+
+const BASE_URL = getApiBaseUrl()
 
 /**
  * Error thrown for any non-2xx API response. `message` is flattened from

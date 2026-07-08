@@ -40,6 +40,10 @@ export const Route = createRootRouteWithContext<RouterContext>()({
         content:
           'JC Kidz Clubhouse — daycare management for families and staff: students, classrooms, guardians and reports.',
       },
+      {
+        name: 'google-site-verification',
+        content: 'DtWrdTBM9iTadhNZMpvZ-W2IQeA34AczsSJ6GjeCPCg',
+      },
     ],
     links: [
       {

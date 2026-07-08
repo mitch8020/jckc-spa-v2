@@ -1,5 +1,6 @@
 import { UnauthorizedException } from '@nestjs/common';
 import type { ExecutionContext } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { Reflector } from '@nestjs/core';
 import { AuthGuard } from './auth.guard';
 import type { AuthInstance } from './auth.provider';
@@ -35,6 +36,7 @@ describe('AuthGuard', () => {
     guard = new AuthGuard(
       reflector as unknown as Reflector,
       auth as unknown as AuthInstance,
+      { get: jest.fn(() => 'user-1@example.com') } as unknown as ConfigService,
     );
   });
 
@@ -62,7 +64,7 @@ describe('AuthGuard', () => {
   it('attaches the session user to the request', async () => {
     reflector.getAllAndOverride.mockReturnValue(false);
     const request = { headers: { cookie: 'sid=1' } };
-    const user = { id: 'user-1', role: 'admin' };
+    const user = { id: 'user-1', role: 'admin', email: 'user-1@example.com' };
     auth.api.getSession.mockResolvedValue({ user });
 
     await expect(guard.canActivate(makeContext(request))).resolves.toBe(true);
@@ -71,5 +73,16 @@ describe('AuthGuard', () => {
       headers: { sourceHeaders: request.headers },
     });
     expect(request).toHaveProperty('user', user);
+  });
+
+  it('throws 401 when the session email is not allowed', async () => {
+    reflector.getAllAndOverride.mockReturnValue(false);
+    auth.api.getSession.mockResolvedValue({
+      user: { id: 'user-2', email: 'other@example.com' },
+    });
+
+    await expect(
+      guard.canActivate(makeContext({ headers: { cookie: 'sid=1' } })),
+    ).rejects.toBeInstanceOf(UnauthorizedException);
   });
 });

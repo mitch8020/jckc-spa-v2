@@ -2,13 +2,13 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
 
 /**
- * Mongoose view over better-auth's `user` collection (better-auth's
+ * Mongoose view over better-auth's `users` collection (better-auth's
  * mongodb adapter owns writes for signup/session flows; the Users module
  * reads and updates profile/role fields through this model). Field names
  * mirror better-auth core fields + the configured `additionalFields`
  * (DESIGN.md "Auth" section).
  */
-@Schema({ collection: 'user' })
+@Schema({ collection: 'users' })
 export class AuthUser {
   @Prop({ required: true })
   name: string;

@@ -36,6 +36,16 @@ function makeConfig(values: Record<string, string | undefined>): ConfigService {
   } as unknown as ConfigService;
 }
 
+function makeDb(name = 'jckc') {
+  return {
+    name,
+    collection: jest.fn(() => ({
+      findOne: jest.fn(),
+      updateOne: jest.fn(),
+    })),
+  };
+}
+
 describe('createAuth', () => {
   beforeEach(() => {
     mockBetterAuth.mockClear();
@@ -43,7 +53,7 @@ describe('createAuth', () => {
   });
 
   it('enables Google when both OAuth credentials are configured', () => {
-    const db = { name: 'jckc' };
+    const db = makeDb();
     const auth = createAuth(
       makeConnection(db),
       makeConfig({
@@ -59,7 +69,11 @@ describe('createAuth', () => {
     expect(mockBetterAuth).toHaveBeenCalledWith(
       expect.objectContaining({
         database: { db },
-        baseURL: 'http://localhost:3001',
+        baseURL: {
+          allowedHosts: ['localhost:3001', '127.0.0.1:3001'],
+          fallback: 'http://localhost:3001',
+          protocol: 'http',
+        },
         basePath: '/api/auth',
         secret: 'secret',
         trustedOrigins: [
@@ -69,20 +83,34 @@ describe('createAuth', () => {
           'http://127.0.0.1:5173',
         ],
         emailAndPassword: { enabled: true },
-        socialProviders: {
-          google: {
-            clientId: 'client-id',
-            clientSecret: 'client-secret',
-          },
-        },
       }),
     );
+    const options = mockBetterAuth.mock.calls[0][0] as {
+      socialProviders?: {
+        google?: {
+          clientId?: string;
+          clientSecret?: string;
+          disableSignUp?: boolean;
+          mapProfileToUser?: unknown;
+        };
+      };
+      user?: { modelName?: string };
+    };
+    expect(options.socialProviders?.google).toEqual(
+      expect.objectContaining({
+        clientId: 'client-id',
+        clientSecret: 'client-secret',
+        disableSignUp: true,
+        mapProfileToUser: expect.any(Function) as unknown,
+      }),
+    );
+    expect(options.user?.modelName).toBe('users');
     expect(auth).toBeDefined();
   });
 
   it('omits social providers when either Google credential is missing', () => {
     createAuth(
-      makeConnection({}),
+      makeConnection(makeDb()),
       makeConfig({
         GOOGLE_CLIENT_ID: 'client-id',
         GOOGLE_CLIENT_SECRET: undefined,
@@ -102,7 +130,7 @@ describe('createAuth', () => {
 
     expect(provider.provide).toBe(AUTH_INSTANCE);
     const auth = provider.useFactory(
-      makeConnection({}),
+      makeConnection(makeDb()),
       makeConfig({
         BETTER_AUTH_URL: 'http://localhost:3001',
         BETTER_AUTH_SECRET: 'secret',

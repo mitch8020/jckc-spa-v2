@@ -6,7 +6,13 @@ import type { Auth } from 'better-auth';
 import { mongodbAdapter } from 'better-auth/adapters/mongodb';
 import type { Db } from 'mongodb';
 import type { Connection } from 'mongoose';
+import { resolveAuthBaseURL } from '../../config/auth-base-url';
 import { resolveFrontendOrigins } from '../../config/frontend-origins';
+import {
+  buildAuthDatabaseHooks,
+  buildGoogleProfileMapper,
+  parseAllowedAuthEmails,
+} from './auth-email-access';
 
 /** Injection token for the better-auth instance. */
 export const AUTH_INSTANCE = 'AUTH_INSTANCE';
@@ -26,19 +32,26 @@ export function createAuth(
 ): AuthInstance {
   const googleClientId = config.get<string>('GOOGLE_CLIENT_ID');
   const googleClientSecret = config.get<string>('GOOGLE_CLIENT_SECRET');
+  const db = connection.getClient().db() as unknown as Db;
+  const allowedAuthEmails = parseAllowedAuthEmails(
+    config.get<string>('AUTH_ALLOWED_EMAILS'),
+  );
   const socialProviders =
     googleClientId && googleClientSecret
       ? {
           google: {
             clientId: googleClientId,
             clientSecret: googleClientSecret,
+            disableSignUp: true,
+            mapProfileToUser: buildGoogleProfileMapper(db, allowedAuthEmails),
           },
         }
       : undefined;
 
   return betterAuth({
-    database: mongodbAdapter(connection.getClient().db() as unknown as Db),
-    baseURL: config.getOrThrow<string>('BETTER_AUTH_URL'),
+    database: mongodbAdapter(db),
+    databaseHooks: buildAuthDatabaseHooks(db, allowedAuthEmails),
+    baseURL: resolveAuthBaseURL(config.getOrThrow<string>('BETTER_AUTH_URL')),
     basePath: '/api/auth',
     secret: config.getOrThrow<string>('BETTER_AUTH_SECRET'),
     trustedOrigins: resolveFrontendOrigins(
@@ -47,6 +60,7 @@ export function createAuth(
     emailAndPassword: { enabled: true },
     socialProviders,
     user: {
+      modelName: 'users',
       additionalFields: {
         // Privileged fields are input: false so a signup request cannot
         // self-assign a role/registration/permissions — they change only
