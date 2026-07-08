@@ -18,7 +18,6 @@ import {
   tableHeadClass,
 } from '#/components/DataTable'
 import { EmptyState } from '#/components/EmptyState'
-import { GreetingBar } from '#/components/GreetingBar'
 import { PageHeader } from '#/components/PageHeader'
 import { StatusPill } from '#/components/StatusPill'
 import { Button } from '#/components/ui/button'
@@ -79,8 +78,6 @@ function StudentDetailsPage() {
 
   return (
     <div className="space-y-6">
-      {/* Greeting strip on detail pages (ui-layout.md §1.1). */}
-      <GreetingBar firstName={user.firstName || user.name} />
       <PageHeader kicker="Enrollment" title="Student Details" />
 
       {/* Card 1 — Student Info */}

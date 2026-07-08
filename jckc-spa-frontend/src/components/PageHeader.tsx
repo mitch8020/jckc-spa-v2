@@ -2,7 +2,7 @@ import { cn } from '#/lib/utils'
 import type { ReactNode } from 'react'
 
 /**
- * Standard page heading: uppercase kicker eyebrow + Fraunces display title,
+ * Standard page heading: uppercase kicker eyebrow + display title,
  * with an optional right-aligned action slot (buttons/links).
  */
 export function PageHeader({

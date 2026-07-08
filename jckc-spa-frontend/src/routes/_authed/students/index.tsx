@@ -19,7 +19,6 @@ import {
   tableHeadClass,
 } from '#/components/DataTable'
 import { EmptyState } from '#/components/EmptyState'
-import { GreetingBar } from '#/components/GreetingBar'
 import { PageHeader } from '#/components/PageHeader'
 import { PaginationBar } from '#/components/PaginationBar'
 import { SearchInput } from '#/components/SearchInput'
@@ -85,11 +84,11 @@ function StudentsPage() {
 // ---------------------------------------------------------------------------
 
 function AdminStudentsPage({ isAdmin }: { isAdmin: boolean }) {
-  const user = useSessionUser()
   const params = Route.useSearch()
   const navigate = Route.useNavigate()
   const listQuery = useStudents(params)
   const approveStudent = useApproveStudent()
+  const isTableUpdating = listQuery.isFetching && !listQuery.isPending
 
   // Legacy semantics: any filter/search/sort change resets to page 1.
   const setSearch = (search: string) =>
@@ -107,8 +106,13 @@ function AdminStudentsPage({ isAdmin }: { isAdmin: boolean }) {
         page: 1,
       }),
     })
-  const setPage = (page: number) =>
-    void navigate({ search: (prev) => ({ ...prev, page }) })
+  const setPage = (page: number) => {
+    if (page === params.page) return
+    void navigate({
+      search: (prev) => ({ ...prev, page }),
+      resetScroll: false,
+    })
+  }
 
   const columnCount = isAdmin ? 5 : 4
   const students = listQuery.data?.items ?? []
@@ -121,10 +125,6 @@ function AdminStudentsPage({ isAdmin }: { isAdmin: boolean }) {
 
   return (
     <div className="space-y-6">
-      {/* Greeting strip on the staff summary page (ui-layout.md §1.1); the
-          legacy parent students page has no header, so ParentStudentsPage
-          stays without one. */}
-      <GreetingBar firstName={user.firstName || user.name} />
       <PageHeader
         kicker="Enrollment"
         title="Students Summary"
@@ -172,6 +172,7 @@ function AdminStudentsPage({ isAdmin }: { isAdmin: boolean }) {
       <div
         className="island-shell rise-in overflow-hidden rounded-3xl"
         style={{ animationDelay: '120ms' }}
+        aria-busy={isTableUpdating}
       >
         <Table>
           <TableHeader>
@@ -207,7 +208,12 @@ function AdminStudentsPage({ isAdmin }: { isAdmin: boolean }) {
               ) : null}
             </TableRow>
           </TableHeader>
-          <TableBody>
+          <TableBody
+            className={cn(
+              'transition-opacity duration-150',
+              isTableUpdating && 'opacity-60',
+            )}
+          >
             {listQuery.isPending ? (
               <TableSkeletonRows columnCount={columnCount} />
             ) : listQuery.isError ? (
@@ -249,6 +255,8 @@ function AdminStudentsPage({ isAdmin }: { isAdmin: boolean }) {
             pagination={listQuery.data.pagination}
             noun="students"
             onPageChange={setPage}
+            pending={isTableUpdating}
+            pendingPage={params.page}
           />
         ) : null}
       </div>

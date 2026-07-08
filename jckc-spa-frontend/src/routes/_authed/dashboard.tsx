@@ -14,7 +14,6 @@ import {
 import { isRegistrationRequired, useDashboard } from '#/api/dashboard'
 import { AgeGroupBadge } from '#/components/AgeGroupBadge'
 import { EmptyState } from '#/components/EmptyState'
-import { GreetingBar } from '#/components/GreetingBar'
 import { PageHeader } from '#/components/PageHeader'
 import { StatCard } from '#/components/StatCard'
 import { Button } from '#/components/ui/button'
@@ -60,8 +59,6 @@ function DashboardPage() {
 
   return (
     <div className="space-y-8">
-      <GreetingBar firstName={user.firstName || user.name} />
-
       <PageHeader
         kicker="Overview"
         title={TITLE_BY_ROLE[role] ?? 'Dashboard'}
@@ -120,31 +117,31 @@ function StaffDashboard({
 
   const statItems = [
     {
-      label: 'No. of Infants in Rooms',
+      label: 'Infants in Rooms',
       value: stats.infantsInRooms,
       icon: <BabyIcon />,
       hint: 'In infant classrooms',
     },
     {
-      label: 'No. of Toddlers in Rooms',
+      label: 'Toddlers in Rooms',
       value: stats.toddlersInRooms,
       icon: <BlocksIcon />,
       hint: 'In toddler classrooms',
     },
     {
-      label: 'No. of Preschoolers in Rooms',
+      label: 'Preschoolers in Rooms',
       value: stats.preschoolersInRooms,
       icon: <ShapesIcon />,
       hint: 'In preschool classrooms',
     },
     {
-      label: 'No. of Active Students',
+      label: 'Active Students',
       value: stats.activeStudents,
       icon: <UsersRoundIcon />,
       hint: 'Assigned to a classroom',
     },
     {
-      label: 'No. of Inactive Students',
+      label: 'Inactive Students',
       value: stats.inactiveStudents,
       icon: <UserRoundMinusIcon />,
       hint: 'Not yet in a classroom',

@@ -1,7 +1,6 @@
 import { createFileRoute, redirect } from '@tanstack/react-router'
 import { ClipboardListIcon, DownloadIcon, Loader2Icon } from 'lucide-react'
 import { useDownloadReport } from '#/api/reports'
-import { GreetingBar } from '#/components/GreetingBar'
 import { PageHeader } from '#/components/PageHeader'
 import { Button } from '#/components/ui/button'
 import { useSessionUser } from '#/lib/session'
@@ -47,8 +46,6 @@ function ReportsPage() {
 
   return (
     <div className="space-y-8">
-      <GreetingBar firstName={user.firstName || user.name} />
-
       <PageHeader kicker="Reports" title="Reports Summary" />
 
       <div

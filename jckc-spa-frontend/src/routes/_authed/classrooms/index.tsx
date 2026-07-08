@@ -3,7 +3,6 @@ import { CircleAlertIcon, PlusIcon, SchoolIcon } from 'lucide-react'
 import { useClassrooms } from '#/api/classrooms'
 import { AgeGroupBadge } from '#/components/AgeGroupBadge'
 import { EmptyState } from '#/components/EmptyState'
-import { GreetingBar } from '#/components/GreetingBar'
 import { PageHeader } from '#/components/PageHeader'
 import { Button } from '#/components/ui/button'
 import { Skeleton } from '#/components/ui/skeleton'
@@ -75,7 +74,6 @@ function ClassroomsSummaryPage() {
 
   return (
     <div className="space-y-8">
-      <GreetingBar firstName={user.firstName || user.name} />
       <PageHeader
         kicker="Rooms & teachers"
         title="Classrooms Summary"

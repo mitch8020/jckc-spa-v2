@@ -115,7 +115,7 @@ function LoginPage() {
               <Button
                 type="button"
                 size="lg"
-                className="mt-8 w-full"
+                className="mt-8 w-full hover:cursor-pointer"
                 disabled={isPending}
                 onClick={() => void signInWithGoogle()}
               >

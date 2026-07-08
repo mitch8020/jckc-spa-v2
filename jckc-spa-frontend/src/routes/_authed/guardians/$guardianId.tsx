@@ -15,7 +15,6 @@ import {
 import { ConfirmDialog } from '#/components/ConfirmDialog'
 import { tableCellClass, tableHeadClass } from '#/components/DataTable'
 import { EmptyState } from '#/components/EmptyState'
-import { GreetingBar } from '#/components/GreetingBar'
 import { PageHeader } from '#/components/PageHeader'
 import { Button } from '#/components/ui/button'
 import { Skeleton } from '#/components/ui/skeleton'
@@ -70,7 +69,6 @@ function GuardianDetailsPage() {
   if (!guardian) {
     return (
       <div className="space-y-8">
-        <GreetingBar firstName={user.firstName || user.name} />
         <PageHeader
           kicker="Parents & Guardians"
           title="Parent / Guardian Details"
@@ -138,8 +136,6 @@ function GuardianDetailsPage() {
 
   return (
     <div className="space-y-8">
-      {/* Greeting strip on detail pages (ui-layout.md §1.1). */}
-      <GreetingBar firstName={user.firstName || user.name} />
       <PageHeader
         kicker="Parents & Guardians"
         title="Parent / Guardian Details"
