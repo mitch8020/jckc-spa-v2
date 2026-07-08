@@ -15,10 +15,11 @@ import type {
  * GET /api/guardians — summary rows for the "add guardian to a student"
  * picker, sorted by first name (case-insensitive) server-side.
  */
-export function useGuardians() {
+export function useGuardians(enabled = true) {
   return useQuery({
     queryKey: keys.guardians.list(),
     queryFn: () => get<GuardianSummaryDto[]>('/api/guardians'),
+    enabled,
   })
 }
 

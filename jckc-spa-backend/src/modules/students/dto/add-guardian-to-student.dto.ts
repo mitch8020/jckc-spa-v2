@@ -22,6 +22,9 @@ export class GuardianFieldsDto {
 
   @IsString()
   @IsNotEmpty()
+  @Matches(/^\d{3}-\d{3}-\d{4}$/, {
+    message: 'phoneNumber must match NNN-NNN-NNNN',
+  })
   phoneNumber: string;
 
   @IsString()

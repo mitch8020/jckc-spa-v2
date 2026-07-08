@@ -146,7 +146,7 @@ export interface StudentDto {
   createdAt: string
 }
 
-/** The 7 student fields — body for POST /api/students (all required). */
+/** The 7 student fields. */
 export interface StudentInput {
   studentFirstName: string
   studentLastName: string
@@ -155,6 +155,14 @@ export interface StudentInput {
   studentCity: string
   studentState: string
   studentZIP: string
+}
+
+/** Body for POST /api/students. Provide guardianId or guardian with link fields. */
+export interface CreateStudentBody extends StudentInput {
+  guardianId?: string
+  guardian?: GuardianInput
+  relationshipToStudent?: string
+  authorizedToPickUp?: boolean
 }
 
 /** Body for PATCH /api/students/:id (any subset + approve action). */

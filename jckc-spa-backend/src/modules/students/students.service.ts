@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   ConflictException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -229,12 +230,54 @@ export class StudentsService {
   }
 
   /**
-   * Creates a student from the 7 legacy fields. Parents create a PENDING
-   * application (`applicationApprovalStatus: false` + `createdByUserId`);
-   * admins create approved students (DESIGN.md decision 2). No classroom
-   * is assigned, so new students start "Inactive" (legacy parity).
+   * Creates a student from the 7 legacy fields, optionally with the initial
+   * parent/guardian record collected by the new-student application. Parents
+   * create a PENDING application (`applicationApprovalStatus: false` +
+   * `createdByUserId`); admins create approved students (DESIGN.md decision 2).
+   * No classroom is assigned, so new students start "Inactive" (legacy parity).
    */
   async create(user: SessionUser, dto: CreateStudentDto): Promise<StudentDto> {
+    const hasGuardianId = dto.guardianId !== undefined;
+    const hasNewGuardian = dto.guardian !== undefined;
+    const hasGuardianInfo =
+      hasGuardianId ||
+      hasNewGuardian ||
+      dto.relationshipToStudent !== undefined ||
+      dto.authorizedToPickUp !== undefined;
+
+    if (hasGuardianInfo && hasGuardianId === hasNewGuardian) {
+      throw new BadRequestException(
+        'Provide exactly one of guardianId or guardian',
+      );
+    }
+    if (
+      hasGuardianInfo &&
+      (dto.relationshipToStudent === undefined ||
+        dto.authorizedToPickUp === undefined)
+    ) {
+      throw new BadRequestException(
+        'guardian link fields must be provided together',
+      );
+    }
+    if (hasGuardianId && user.role !== 'admin') {
+      throw new ForbiddenException(
+        'Only admins can link existing guardians while creating a student',
+      );
+    }
+
+    let existingGuardian: GuardianDocument | null = null;
+    if (dto.guardianId !== undefined) {
+      if (!OBJECT_ID_PATTERN.test(dto.guardianId)) {
+        throw new NotFoundException('Guardian not found');
+      }
+      existingGuardian = await this.guardianModel
+        .findById(dto.guardianId)
+        .exec();
+      if (!existingGuardian) {
+        throw new NotFoundException('Guardian not found');
+      }
+    }
+
     const created = await this.studentModel.create({
       studentFirstName: dto.studentFirstName,
       studentLastName: dto.studentLastName,
@@ -247,6 +290,36 @@ export class StudentsService {
         ? { applicationApprovalStatus: true }
         : { applicationApprovalStatus: false, createdByUserId: user.id }),
     });
+
+    if (hasGuardianInfo) {
+      const link: GuardianStudentLink = {
+        student: created._id,
+        relationshipToStudent: dto.relationshipToStudent,
+        authorizedToPickUp: dto.authorizedToPickUp,
+      };
+      if (existingGuardian) {
+        existingGuardian.students ??= [];
+        existingGuardian.students.push(link);
+        await existingGuardian.save();
+        return toStudentDto(
+          created,
+          toPopulatedClassroomDto(created.classroom),
+        );
+      }
+
+      await this.guardianModel.create({
+        guardianFirstName: dto.guardian!.guardianFirstName,
+        guardianLastName: dto.guardian!.guardianLastName,
+        phoneNumber: dto.guardian!.phoneNumber,
+        guardianStreetAddress: dto.guardian!.guardianStreetAddress,
+        guardianCity: dto.guardian!.guardianCity,
+        guardianState: dto.guardian!.guardianState,
+        guardianZIP: dto.guardian!.guardianZIP,
+        students: [link],
+        ...(user.role === 'parent' ? { userId: user.id } : {}),
+      });
+    }
+
     return toStudentDto(created, toPopulatedClassroomDto(created.classroom));
   }
 

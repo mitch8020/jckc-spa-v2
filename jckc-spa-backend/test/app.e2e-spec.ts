@@ -54,6 +54,16 @@ const STUDENT_BODY = {
   studentZIP: '37604',
 };
 
+const GUARDIAN_BODY = {
+  guardianFirstName: 'Pat',
+  guardianLastName: 'Parent',
+  phoneNumber: '423-555-1212',
+  guardianStreetAddress: '99 Parent Ave',
+  guardianCity: 'Johnson City',
+  guardianState: 'TN',
+  guardianZIP: '37604',
+};
+
 describe('JCKC backend (e2e)', () => {
   let app: INestApplication<App>;
   let mongod: MongoMemoryServer;
@@ -122,6 +132,42 @@ describe('JCKC backend (e2e)', () => {
         .expect(200)
         .expect({ status: 'ok' });
     });
+
+    it.each([
+      ['localhost:3001', 'http://localhost:3000/dashboard'],
+      ['127.0.0.1:3001', 'http://127.0.0.1:3000/dashboard'],
+    ])(
+      'starts Google OAuth with state cookie and matching redirect host for %s',
+      async (host, callbackURL) => {
+        const res = await request(server)
+          .post('/api/auth/sign-in/social')
+          .set('Host', host)
+          .set('Origin', new URL(callbackURL).origin)
+          .send({
+            provider: 'google',
+            callbackURL,
+            disableRedirect: true,
+          })
+          .expect(200);
+
+        const body = res.body as Record<string, unknown>;
+        if (typeof body.url !== 'string') {
+          throw new Error('Expected OAuth start response to include url');
+        }
+        const redirectUrl = new URL(body.url);
+        expect(redirectUrl.searchParams.get('redirect_uri')).toBe(
+          `http://${host}/api/auth/callback/google`,
+        );
+        expect(redirectUrl.searchParams.get('state')).toEqual(
+          expect.any(String),
+        );
+
+        const setCookies: string[] = res.get('Set-Cookie') ?? [];
+        expect(
+          setCookies.some((cookie) => cookie.startsWith('better-auth.state=')),
+        ).toBe(true);
+      },
+    );
 
     it('rejects unauthenticated requests with 401', async () => {
       await request(server).get('/api/users/me').expect(401);
@@ -204,7 +250,7 @@ describe('JCKC backend (e2e)', () => {
     it('flips a user to admin via direct DB write (bootstrap)', async () => {
       adminCookie = await signUp('Ada Admin', 'ada.admin@example.com');
 
-      await connection.collection('user').updateOne(
+      await connection.collection('users').updateOne(
         { email: 'ada.admin@example.com' },
         {
           $set: {
@@ -446,6 +492,107 @@ describe('JCKC backend (e2e)', () => {
       expect((res.body as { message: string }).message).toBe(
         'REGISTRATION_REQUIRED',
       );
+    });
+  });
+
+  describe('student applications', () => {
+    it('creates a pending application with an initial parent guardian link', async () => {
+      const parent = await getMe(parentCookie);
+
+      const res = await request(server)
+        .post('/api/students')
+        .set('Cookie', parentCookie)
+        .send({
+          ...STUDENT_BODY,
+          studentFirstName: 'Penny',
+          studentLastName: 'Parented',
+          guardian: GUARDIAN_BODY,
+          relationshipToStudent: 'Mother',
+          authorizedToPickUp: false,
+        })
+        .expect(201);
+      const created = res.body as StudentDto;
+      expect(created).toMatchObject({
+        studentFirstName: 'Penny',
+        studentLastName: 'Parented',
+        applicationApprovalStatus: false,
+      });
+
+      const guardian = await connection
+        .collection<{
+          userId?: string;
+          guardianFirstName?: string;
+          students?: Array<{
+            student?: unknown;
+            relationshipToStudent?: string;
+            authorizedToPickUp?: boolean;
+          }>;
+        }>('guardians')
+        .findOne({
+          userId: parent.id,
+          guardianFirstName: GUARDIAN_BODY.guardianFirstName,
+        });
+      expect(guardian).not.toBeNull();
+      const link = guardian?.students?.[0];
+      expect(String(link?.student)).toBe(created.id);
+      expect(link?.relationshipToStudent).toBe('Mother');
+      expect(link?.authorizedToPickUp).toBe(false);
+
+      const dashboardRes = await request(server)
+        .get('/api/dashboard')
+        .set('Cookie', parentCookie)
+        .expect(200);
+      const dashboard = dashboardRes.body as ParentDashboardDto;
+      expect(dashboard.students.registered).toEqual([]);
+      expect(dashboard.students.pending.map((student) => student.id)).toContain(
+        created.id,
+      );
+    });
+
+    it('lets admins create a student linked to an existing guardian', async () => {
+      const inserted = await connection.collection('guardians').insertOne({
+        ...GUARDIAN_BODY,
+        guardianFirstName: 'Existing',
+        guardianLastName: 'Guardian',
+        students: [],
+        createdAt: new Date(),
+      });
+
+      const res = await request(server)
+        .post('/api/students')
+        .set('Cookie', adminCookie)
+        .send({
+          ...STUDENT_BODY,
+          studentFirstName: 'Ellis',
+          studentLastName: 'Linked',
+          guardianId: inserted.insertedId.toString(),
+          relationshipToStudent: 'Aunt',
+          authorizedToPickUp: true,
+        })
+        .expect(201);
+      const created = res.body as StudentDto;
+      expect(created).toMatchObject({
+        studentFirstName: 'Ellis',
+        studentLastName: 'Linked',
+        applicationApprovalStatus: true,
+      });
+
+      const guardian = await connection
+        .collection<{
+          students?: Array<{
+            student?: unknown;
+            relationshipToStudent?: string;
+            authorizedToPickUp?: boolean;
+          }>;
+        }>('guardians')
+        .findOne({ _id: inserted.insertedId });
+      const link = guardian?.students?.find(
+        (entry) => String(entry.student) === created.id,
+      );
+      expect(link).toMatchObject({
+        relationshipToStudent: 'Aunt',
+        authorizedToPickUp: true,
+      });
     });
   });
 

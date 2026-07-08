@@ -9,11 +9,11 @@ import { ApiError, del, get, patch, post } from '#/api/client'
 import { keys } from '#/api/keys'
 import type { StudentListParams } from '#/api/keys'
 import type {
+  CreateStudentBody,
   GuardianForStudentDto,
   MyStudentsDto,
   Paginated,
   StudentDto,
-  StudentInput,
   UpdateStudentBody,
 } from '#/api/types'
 
@@ -88,9 +88,11 @@ export function useStudentGuardians(id: string) {
 export function useCreateStudent() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (body: StudentInput) => post<StudentDto>('/api/students', body),
+    mutationFn: (body: CreateStudentBody) =>
+      post<StudentDto>('/api/students', body),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: keys.students.all })
+      await queryClient.invalidateQueries({ queryKey: keys.guardians.all })
       await queryClient.invalidateQueries({ queryKey: keys.classrooms.all })
       await queryClient.invalidateQueries({ queryKey: keys.dashboard.all })
     },

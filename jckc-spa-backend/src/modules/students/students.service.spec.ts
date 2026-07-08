@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   ConflictException,
+  ForbiddenException,
   NotFoundException,
 } from '@nestjs/common';
 import { getModelToken } from '@nestjs/mongoose';
@@ -459,6 +460,147 @@ describe('StudentsService', () => {
         ...dto,
         applicationApprovalStatus: true,
       });
+    });
+
+    it('parent create with guardian creates a pending student and linked parent guardian', async () => {
+      studentModel.create.mockResolvedValue(
+        makeStudentDoc({ applicationApprovalStatus: false }),
+      );
+
+      const result = await service.create(makeSessionUser(), {
+        ...dto,
+        guardian: makeGuardianFields(),
+        relationshipToStudent: 'Mother',
+        authorizedToPickUp: false,
+      });
+
+      expect(studentModel.create).toHaveBeenCalledWith({
+        ...dto,
+        applicationApprovalStatus: false,
+        createdByUserId: 'user-1',
+      });
+      expect(guardianModel.create).toHaveBeenCalledWith({
+        ...makeGuardianFields(),
+        userId: 'user-1',
+        students: [
+          {
+            student: STUDENT_ID,
+            relationshipToStudent: 'Mother',
+            authorizedToPickUp: false,
+          },
+        ],
+      });
+      expect(result.applicationApprovalStatus).toBe(false);
+    });
+
+    it('admin create with guardian links the guardian without assigning admin userId', async () => {
+      studentModel.create.mockResolvedValue(
+        makeStudentDoc({ applicationApprovalStatus: true }),
+      );
+
+      await service.create(makeSessionUser({ role: 'admin', id: 'admin-1' }), {
+        ...dto,
+        guardian: makeGuardianFields(),
+        relationshipToStudent: 'Father',
+        authorizedToPickUp: true,
+      });
+
+      expect(guardianModel.create).toHaveBeenCalledWith({
+        ...makeGuardianFields(),
+        students: [
+          {
+            student: STUDENT_ID,
+            relationshipToStudent: 'Father',
+            authorizedToPickUp: true,
+          },
+        ],
+      });
+    });
+
+    it('admin create with guardianId appends the new student link to an existing guardian', async () => {
+      studentModel.create.mockResolvedValue(
+        makeStudentDoc({ applicationApprovalStatus: true }),
+      );
+      const guardianDoc = {
+        _id: GUARDIAN_ID,
+        ...makeGuardianFields(),
+        students: [] as unknown[],
+        save: jest.fn().mockResolvedValue(undefined),
+      };
+      guardianModel.findById.mockReturnValue(exec(guardianDoc));
+
+      await service.create(makeSessionUser({ role: 'admin', id: 'admin-1' }), {
+        ...dto,
+        guardianId: GUARDIAN_ID.toHexString(),
+        relationshipToStudent: 'Aunt',
+        authorizedToPickUp: false,
+      });
+
+      expect(guardianModel.findById).toHaveBeenCalledWith(
+        GUARDIAN_ID.toHexString(),
+      );
+      expect(studentModel.create).toHaveBeenCalledWith({
+        ...dto,
+        applicationApprovalStatus: true,
+      });
+      expect(guardianDoc.students).toEqual([
+        {
+          student: STUDENT_ID,
+          relationshipToStudent: 'Aunt',
+          authorizedToPickUp: false,
+        },
+      ]);
+      expect(guardianDoc.save).toHaveBeenCalledTimes(1);
+      expect(guardianModel.create).not.toHaveBeenCalled();
+    });
+
+    it('rejects parent create with guardianId before creating the student', async () => {
+      await expect(
+        service.create(makeSessionUser(), {
+          ...dto,
+          guardianId: GUARDIAN_ID.toHexString(),
+          relationshipToStudent: 'Mother',
+          authorizedToPickUp: true,
+        }),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+
+      expect(studentModel.create).not.toHaveBeenCalled();
+      expect(guardianModel.findById).not.toHaveBeenCalled();
+    });
+
+    it('rejects unknown or malformed guardianId before creating the student', async () => {
+      await expect(
+        service.create(makeSessionUser({ role: 'admin' }), {
+          ...dto,
+          guardianId: 'bad-id',
+          relationshipToStudent: 'Aunt',
+          authorizedToPickUp: true,
+        }),
+      ).rejects.toBeInstanceOf(NotFoundException);
+      expect(studentModel.create).not.toHaveBeenCalled();
+
+      guardianModel.findById.mockReturnValue(exec(null));
+      await expect(
+        service.create(makeSessionUser({ role: 'admin' }), {
+          ...dto,
+          guardianId: GUARDIAN_ID.toHexString(),
+          relationshipToStudent: 'Aunt',
+          authorizedToPickUp: true,
+        }),
+      ).rejects.toBeInstanceOf(NotFoundException);
+      expect(studentModel.create).not.toHaveBeenCalled();
+    });
+
+    it('rejects partial inline guardian payloads before creating the student', async () => {
+      await expect(
+        service.create(makeSessionUser(), {
+          ...dto,
+          relationshipToStudent: 'Mother',
+        }),
+      ).rejects.toBeInstanceOf(BadRequestException);
+
+      expect(studentModel.create).not.toHaveBeenCalled();
+      expect(guardianModel.create).not.toHaveBeenCalled();
     });
   });
 

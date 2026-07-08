@@ -69,8 +69,45 @@ describe('DTO validation', () => {
       studentState: 'TN',
       studentZIP: '37604',
     };
+    const guardian = {
+      guardianFirstName: 'Grace',
+      guardianLastName: 'Hopper',
+      phoneNumber: '423-555-1212',
+      guardianStreetAddress: '1 Harbor Ln',
+      guardianCity: 'Johnson City',
+      guardianState: 'TN',
+      guardianZIP: '37604',
+    };
 
     expect(errorsFor(CreateStudentDto, student)).toEqual([]);
+    expect(
+      errorsFor(CreateStudentDto, {
+        ...student,
+        guardian,
+        relationshipToStudent: 'Mother',
+        authorizedToPickUp: false,
+      }),
+    ).toEqual([]);
+    expect(
+      errorsFor(CreateStudentDto, {
+        ...student,
+        guardianId: OBJECT_ID,
+        relationshipToStudent: 'Mother',
+        authorizedToPickUp: false,
+      }),
+    ).toEqual([]);
+    expect(
+      errorsFor(CreateStudentDto, {
+        ...student,
+        guardian,
+      }),
+    ).toHaveLength(2);
+    expect(
+      errorsFor(CreateStudentDto, {
+        ...student,
+        guardianId: OBJECT_ID,
+      }),
+    ).toHaveLength(2);
     expect(
       errorsFor(CreateStudentDto, {
         ...student,
@@ -106,6 +143,9 @@ describe('DTO validation', () => {
     };
 
     expect(errorsFor(GuardianFieldsDto, guardian)).toEqual([]);
+    expect(
+      errorsFor(GuardianFieldsDto, { ...guardian, phoneNumber: 'bad' }),
+    ).toHaveLength(1);
     expect(
       errorsFor(AddGuardianToStudentDto, {
         guardian,
