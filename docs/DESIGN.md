@@ -18,8 +18,8 @@ exact field names** so existing production data keeps working unchanged:
 - `students` — Mongoose schema `Student`: studentFirstName, studentLastName (required), dateOfBirth (String, required), studentStreetAddress/studentCity/studentState/studentZIP (required), teacherName, ageGroup, classroom (ObjectId ref Classroom), createdAt.
 - `classrooms` — `Classroom`: classroomName (required), ageGroup (required), teacherName, createdAt.
 - `guardians` — `Guardian`: guardianFirstName, guardianLastName, phoneNumber, guardianStreetAddress/guardianCity/guardianState/guardianZIP (all required), createdAt, and `students`: an array of **link subdocuments** `{ student: ObjectId, relationshipToStudent: string, authorizedToPickUp: boolean }` (legacy schema declares it as a bare Array — the new schema must model the subdocument shape explicitly but stay byte-compatible with existing docs, including tolerating dangling student refs).
-- Legacy `users` collection is superseded by better-auth's `user` collection (see Auth). A
-  migration script maps legacy users in.
+- The existing `users` collection is the better-auth user collection. New auth writes must not
+  create a singular `user` collection; migration normalizes legacy user fields in place.
 
 Schemas are declared with `@Schema({ collection: '...' })` + `@Prop` decorators in
 `src/modules/<feature>/schemas/*.schema.ts`.
@@ -28,8 +28,12 @@ Schemas are declared with `@Schema({ collection: '...' })` + `@Prop` decorators 
 
 - `better-auth` (^1.5.x) instance created in `src/modules/auth/`, using the **mongodb adapter**
   fed from the existing mongoose connection: `mongodbAdapter(connection.getClient().db())`.
+  Set `user.modelName: 'users'` so better-auth writes to the existing `users` collection.
 - Providers: **Google OAuth** (`socialProviders.google` from GOOGLE_CLIENT_ID/SECRET) — parity
   with legacy — plus **email & password** enabled (modernization).
+- `AUTH_ALLOWED_EMAILS` gates authentication. The default allowlist is
+  `jpmitra.swe@gmail.com,mitrajs@yahoo.com,khinson60@yahoo.com`; Google OAuth also normalizes
+  matching legacy `users.emailAddress` docs before Better Auth links the account.
 - `user.additionalFields` mirrors the legacy User model semantics:
   - `role`: string, default `""` — one of `"" | "parent" | "teacher" | "admin"` (legacy `accountType`).
   - `registrationStatus`: boolean, default false (has the user completed the in-app registration form).
@@ -63,7 +67,7 @@ src/
   modules/guardians/       # CRUD + student linkage per guardians.md
   modules/reports/         # pdfmake PDF generation per reports.md — stream response, do NOT write to disk
   modules/dashboard/       # GET /api/dashboard — role-appropriate stats per auth-dashboards.md
-scripts/migrate-legacy-users.ts  # legacy users collection → better-auth user docs
+scripts/migrate-legacy-users.ts  # normalize existing users collection + add better-auth accounts
 ```
 
 - DTOs with class-validator; global `ValidationPipe({ whitelist: true, transform: true })`.
@@ -197,8 +201,8 @@ accents). Staggered page-load reveals (CSS animation-delay), subtle hover lifts 
 12. **Parent profile page** (legacy = dead stub): real `GET /api/users/me` + `PATCH /api/users/me`
     (firstName, lastName, dateOfBirth, phoneNumber; email shown read-only from auth). Available to
     all roles (fixes the missing teacher/admin profile views).
-13. **Migration script** `scripts/migrate-legacy-users.ts`: maps legacy `users` docs → better-auth
-    `user` + `account` collections (googleId → account { providerId: 'google', accountId },
+13. **Migration script** `scripts/migrate-legacy-users.ts`: normalizes legacy `users` docs in place
+    for better-auth and creates `account` docs (googleId → account { providerId: 'google', accountId },
     accountType→role, registrationStatus, firstNameApp→firstName, etc.; emailAddress may be '' —
     generate placeholder `legacy-<_id>@placeholder.invalid` with a warning list). Also
     `scripts/normalize-guardian-links.ts`: casts string `students[].student` ids (from the 2026-03-15

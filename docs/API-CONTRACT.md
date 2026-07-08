@@ -60,7 +60,7 @@ phoneNumber, dateOfBirth) — configure `inferAdditionalFields` client plugin wi
 | `GET /api/students/mine` | parent | → `{ registered: StudentDto[], pending: StudentDto[] }` — students where createdByUserId = me OR linked via guardian with userId = me; split on applicationApprovalStatus (missing = true = registered). Sorted by first name. |
 | `GET /api/students/:id` | admin, teacher | → StudentDto |
 | `GET /api/students/:id/guardians` | admin, teacher | → GuardianForStudentDto[] (guardians linked to this student, sorted guardianFirstName asc case-insensitive) |
-| `POST /api/students` | admin, parent | body: the 7 student fields, all required; state must be in the 57-code list; DOB valid + not future; ZIP 5 digits (string). Parent → applicationApprovalStatus=false + createdByUserId; admin → true. → StudentDto (201) |
+| `POST /api/students` | admin, parent | body: the 7 student fields, all required; state must be in the 57-code list; DOB valid + not future; ZIP 5 digits (string). May also include `guardian: {7 guardian fields}` OR admin-only `guardianId`, plus `relationshipToStudent` and `authorizedToPickUp`, to create the initial parent/guardian link. Parent → applicationApprovalStatus=false + createdByUserId and inline guardian `userId`; admin → approved student and either unowned inline guardian or linked existing guardian. → StudentDto (201) |
 | `PATCH /api/students/:id` | admin | body: any subset of the 7 fields + `applicationApprovalStatus?: boolean` (approve action). Validated like POST. → StudentDto |
 | `DELETE /api/students/:id` | admin | 404 unknown. Cascades: `$pull` this student from all guardians' students arrays (handles both ObjectId and string-stored ids). → 204 |
 | `POST /api/students/:studentId/guardians` | admin | body `{ guardianId?: string, guardian?: {7 guardian fields}, relationshipToStudent: string, authorizedToPickUp: boolean }` — exactly one of guardianId/guardian. 409 if guardian already linked to this student. → GuardianDto (201) |
@@ -111,7 +111,7 @@ phoneNumber, dateOfBirth) — configure `inferAdditionalFields` client plugin wi
 | `/register` | POST /api/users/register |
 | `/dashboard` | GET /api/dashboard |
 | `/students` | admin/teacher: GET /api/students (URL search params page/status/search/order kept in the route's search params); parent: GET /api/students/mine |
-| `/students/new` | POST /api/students |
+| `/students/new` | POST /api/students with student fields plus initial parent/guardian fields; admins can select an existing guardian |
 | `/students/$studentId` | GET /api/students/:id + GET /api/students/:id/guardians; delete dialog → DELETE |
 | `/students/$studentId/edit` | PATCH /api/students/:id |
 | `/students/$studentId/add-guardian` | GET /api/guardians + POST /api/students/:id/guardians |
