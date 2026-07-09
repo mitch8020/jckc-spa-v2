@@ -3,9 +3,18 @@
   "private": true,
   "version": "1.0.0",
   "type": "module",
+  "engines": {
+    "node": "24.x",
+    "npm": "11.x"
+  },
+  "cacheDirectories": [
+    "jckc-spa-backend/node_modules",
+    "jckc-spa-frontend/node_modules"
+  ],
   "scripts": {
     "install": "node scripts/install-workspace.mjs",
     "i": "npm run install --",
+    "start": "npm --prefix jckc-spa-backend run start:prod",
     "deploy": "npm run deploy:dev --",
     "deploy:dev": "node scripts/run-local.mjs --env dev --target both",
     "deploy:prod": "node scripts/run-local.mjs --env prod --target both",
