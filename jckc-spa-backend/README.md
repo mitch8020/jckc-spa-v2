@@ -32,6 +32,7 @@ and owns `account` and `session`.
 | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | no | Enables Google sign-in when both set |
 | `AUTH_ALLOWED_EMAILS` | no | Comma-separated emails allowed to authenticate; defaults to `jpmitra.swe@gmail.com,mitrajs@yahoo.com,khinson60@yahoo.com` |
 | `ADMIN_EMAILS` | no | Comma-separated emails that register as admin (bootstrap) |
+| `TEACHER_EMAILS` | no | Comma-separated emails allowed to self-register as teacher; everyone else can self-register only as parent unless listed in `ADMIN_EMAILS` |
 
 For local Google OAuth, add both loopback callback URIs in Google Cloud
 Console's **Authorized redirect URIs**. The app supports either host so the

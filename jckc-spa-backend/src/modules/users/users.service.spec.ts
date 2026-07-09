@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   ConflictException,
+  ForbiddenException,
   NotFoundException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -265,7 +266,10 @@ describe('UsersService', () => {
       expect(result.role).toBe('parent');
     });
 
-    it('sets teacherPermission for teacher registrations', async () => {
+    it('sets teacherPermission for allowlisted teacher registrations', async () => {
+      configGet.mockImplementation((key: string) =>
+        key === 'TEACHER_EMAILS' ? 'jane@example.com' : '',
+      );
       userModel.findOneAndUpdate.mockReturnValue(
         exec(makeUserDoc({ role: 'teacher', registrationStatus: true })),
       );
@@ -279,6 +283,15 @@ describe('UsersService', () => {
       expect(update.$set.role).toBe('teacher');
       expect(update.$set.teacherPermission).toBe(true);
       expect(update.$set).not.toHaveProperty('parentPermission');
+    });
+
+    it('throws 403 for non-allowlisted teacher registration attempts', async () => {
+      configGet.mockReturnValue(undefined);
+
+      await expect(
+        service.register(makeSessionUser(), { ...dto, role: 'teacher' }),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+      expect(userModel.findOneAndUpdate).not.toHaveBeenCalled();
     });
 
     it('bootstraps admin when the email is in ADMIN_EMAILS (case-insensitive)', async () => {
@@ -311,21 +324,6 @@ describe('UsersService', () => {
         service.register(makeSessionUser({ id: 'not-an-object-id' }), dto),
       ).rejects.toBeInstanceOf(NotFoundException);
       expect(userModel.findOneAndUpdate).not.toHaveBeenCalled();
-    });
-
-    it('uses requested role when ADMIN_EMAILS is not configured', async () => {
-      configGet.mockReturnValue(undefined);
-      userModel.findOneAndUpdate.mockReturnValue(
-        exec(makeUserDoc({ role: 'teacher', registrationStatus: true })),
-      );
-
-      await service.register(makeSessionUser(), { ...dto, role: 'teacher' });
-
-      const [, update] = userModel.findOneAndUpdate.mock.calls[0] as [
-        unknown,
-        { $set: Record<string, unknown> },
-      ];
-      expect(update.$set.role).toBe('teacher');
     });
 
     it('throws 409 when the atomic update loses the race but the user exists', async () => {

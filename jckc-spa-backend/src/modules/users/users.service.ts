@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   ConflictException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -83,8 +84,9 @@ export class UsersService {
    * Completes in-app registration for the AUTHENTICATED user (fixes the
    * legacy IDOR). Single atomic update: profile fields + role +
    * registrationStatus + the matching legacy permission boolean. 409 if
-   * already registered; ADMIN_EMAILS bootstrap overrides the requested
-   * role with 'admin'.
+   * already registered. ADMIN_EMAILS bootstrap grants admin; TEACHER_EMAILS
+   * gates self-service teacher registration so a new parent cannot grant
+   * themselves staff access.
    */
   async register(user: SessionUser, dto: RegisterUserDto): Promise<UserDto> {
     if (!isValidObjectId(user.id)) {
@@ -94,9 +96,7 @@ export class UsersService {
       throw new ConflictException('User is already registered');
     }
 
-    const role: AppRole = this.isBootstrapAdmin(user.email)
-      ? 'admin'
-      : dto.role;
+    const role = this.resolveRegistrationRole(user.email, dto.role);
 
     const updated = await this.userModel
       .findOneAndUpdate(
@@ -194,12 +194,28 @@ export class UsersService {
     return this.toDto(updated);
   }
 
-  private isBootstrapAdmin(email: string): boolean {
-    const adminEmails = (this.configService.get<string>('ADMIN_EMAILS') ?? '')
+  private resolveRegistrationRole(
+    email: string,
+    requestedRole: RegisterUserDto['role'],
+  ): AppRole {
+    if (this.emailInConfigList(email, 'ADMIN_EMAILS')) {
+      return 'admin';
+    }
+    if (requestedRole === 'teacher') {
+      if (!this.emailInConfigList(email, 'TEACHER_EMAILS')) {
+        throw new ForbiddenException('Teacher registration requires approval');
+      }
+      return 'teacher';
+    }
+    return 'parent';
+  }
+
+  private emailInConfigList(email: string, key: string): boolean {
+    const configuredEmails = (this.configService.get<string>(key) ?? '')
       .split(',')
       .map((entry) => entry.trim().toLowerCase())
       .filter((entry) => entry.length > 0);
-    return adminEmails.includes(email.trim().toLowerCase());
+    return configuredEmails.includes(email.trim().toLowerCase());
   }
 
   private toDto(user: AuthUserDocument): UserDto {
