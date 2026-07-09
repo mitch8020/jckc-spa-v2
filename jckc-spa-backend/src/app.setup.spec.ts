@@ -22,14 +22,16 @@ describe('configureApp', () => {
       ),
     };
     const auth = { api: {} };
-    const expressApp = { all: jest.fn() };
+    const expressApp = { all: jest.fn(), set: jest.fn(), use: jest.fn() };
     const app = {
       get: jest.fn((token: unknown) =>
         token === ConfigService ? config : auth,
       ),
       enableCors: jest.fn(),
       getHttpAdapter: jest.fn(() => ({ getInstance: () => expressApp })),
-      use: jest.fn(),
+      use: jest.fn((middleware: unknown) => {
+        void middleware;
+      }),
       setGlobalPrefix: jest.fn(),
       useGlobalPipes: jest.fn(),
       useGlobalFilters: jest.fn(),
@@ -49,6 +51,7 @@ describe('configureApp', () => {
       credentials: true,
     });
     expect(mockToNodeHandler).toHaveBeenCalledWith(auth);
+    expect(expressApp.set).toHaveBeenCalledWith('trust proxy', 1);
     expect(expressApp.all).toHaveBeenCalledWith('/api/auth/{*splat}', {
       auth,
     });

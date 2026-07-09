@@ -10,6 +10,7 @@ import { resolveAuthBaseURL } from './config/auth-base-url';
 import { resolveFrontendOrigins } from './config/frontend-origins';
 import { AUTH_INSTANCE } from './modules/auth/auth.provider';
 import type { AuthInstance } from './modules/auth/auth.provider';
+import { mountFrontend } from './frontend.setup';
 
 const SAFE_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
 
@@ -101,10 +102,12 @@ export function configureApp(app: NestExpressApplication): void {
   // Express 5 wildcard syntax: '{*splat}'.
   const auth = app.get<AuthInstance>(AUTH_INSTANCE);
   const expressApp = app.getHttpAdapter().getInstance();
+  expressApp.set('trust proxy', 1);
   app.use(
     csrfOriginGuard(resolveAllowedUnsafeOrigins(frontendOrigins, authBaseUrl)),
   );
   expressApp.all('/api/auth/{*splat}', toNodeHandler(auth));
+  mountFrontend(expressApp);
 
   app.use(express.json({ limit: '100kb' }));
   app.use(
