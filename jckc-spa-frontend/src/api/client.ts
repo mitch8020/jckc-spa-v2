@@ -37,11 +37,16 @@ async function request<T>(
   path: string,
   body?: unknown,
 ): Promise<T> {
+  const headers: Record<string, string> = {}
+  if (body !== undefined) headers['Content-Type'] = 'application/json'
+  if (!['GET', 'HEAD'].includes(method)) {
+    headers['X-Requested-With'] = 'XMLHttpRequest'
+  }
+
   const res = await fetch(`${BASE_URL}${path}`, {
     method,
     credentials: 'include',
-    headers:
-      body === undefined ? undefined : { 'Content-Type': 'application/json' },
+    headers: Object.keys(headers).length > 0 ? headers : undefined,
     body: body === undefined ? undefined : JSON.stringify(body),
   })
 

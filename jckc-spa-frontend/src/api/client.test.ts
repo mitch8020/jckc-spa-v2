@@ -43,22 +43,36 @@ describe('api client', () => {
       .mockResolvedValueOnce(new Response('', { status: 200 }))
       .mockResolvedValueOnce(new Response('', { status: 200 }))
 
-    await expect(post('/api/students', { name: 'Ada' })).resolves.toBeUndefined()
-    await expect(patch('/api/students/1', { name: 'Ada' })).resolves.toBeUndefined()
+    await expect(
+      post('/api/students', { name: 'Ada' }),
+    ).resolves.toBeUndefined()
+    await expect(
+      patch('/api/students/1', { name: 'Ada' }),
+    ).resolves.toBeUndefined()
 
-    expect(fetchMock).toHaveBeenNthCalledWith(1, 'http://api.test/api/students', {
-      method: 'POST',
-      credentials: 'include',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: 'Ada' }),
-    })
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      1,
+      'http://api.test/api/students',
+      {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest',
+        },
+        body: JSON.stringify({ name: 'Ada' }),
+      },
+    )
     expect(fetchMock).toHaveBeenNthCalledWith(
       2,
       'http://api.test/api/students/1',
       {
         method: 'PATCH',
         credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest',
+        },
         body: JSON.stringify({ name: 'Ada' }),
       },
     )
@@ -73,7 +87,7 @@ describe('api client', () => {
     expect(fetchMock).toHaveBeenCalledWith('http://api.test/api/students/1', {
       method: 'DELETE',
       credentials: 'include',
-      headers: undefined,
+      headers: { 'X-Requested-With': 'XMLHttpRequest' },
       body: undefined,
     })
   })
@@ -166,7 +180,9 @@ describe('api client', () => {
       configurable: true,
       value: revokeObjectURL,
     })
-    fetchMock.mockResolvedValue(new Response(new Blob(['pdf']), { status: 200 }))
+    fetchMock.mockResolvedValue(
+      new Response(new Blob(['pdf']), { status: 200 }),
+    )
 
     await expect(
       downloadFile('/api/reports/sign-in-sheet', 'sign-in-sheet.pdf'),
@@ -187,7 +203,9 @@ describe('api client', () => {
       new Response(JSON.stringify({ message: 'Forbidden' }), { status: 403 }),
     )
 
-    await expect(downloadFile('/api/reports/sign-in-sheet', 'x.pdf')).rejects.toMatchObject({
+    await expect(
+      downloadFile('/api/reports/sign-in-sheet', 'x.pdf'),
+    ).rejects.toMatchObject({
       status: 403,
       message: 'Forbidden',
     })
