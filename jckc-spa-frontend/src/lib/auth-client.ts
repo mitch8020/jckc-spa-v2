@@ -2,13 +2,15 @@ import { createAuthClient } from 'better-auth/react'
 import { inferAdditionalFields } from 'better-auth/client/plugins'
 import { getApiBaseUrl } from '#/lib/api-url'
 
+const apiBaseUrl = getApiBaseUrl()
+
 /**
- * better-auth React client, pointed at the NestJS backend (which hosts
- * better-auth at `${VITE_API_URL}/api/auth/*`). Session cookies are
- * cross-origin (3000 → 3001), so every call includes credentials.
+ * better-auth React client. Local split-server development points at
+ * `${VITE_API_URL}/api/auth/*`; single-origin deployments leave VITE_API_URL
+ * unset and use the backend-served `/api/auth/*` path.
  */
 export const authClient = createAuthClient({
-  baseURL: getApiBaseUrl(),
+  ...(apiBaseUrl ? { baseURL: apiBaseUrl } : {}),
   plugins: [
     inferAdditionalFields({
       user: {

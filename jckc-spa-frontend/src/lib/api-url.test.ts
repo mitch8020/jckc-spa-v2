@@ -25,4 +25,9 @@ describe('resolveApiBaseUrl', () => {
       'http://127.0.0.1:3001',
     )
   })
+
+  it('uses same-origin requests when no API URL is configured', () => {
+    expect(resolveApiBaseUrl(undefined, 'app.example.test')).toBe('')
+    expect(resolveApiBaseUrl('', 'app.example.test')).toBe('')
+  })
 })
