@@ -123,95 +123,128 @@ function LoginPage() {
                 Continue with Google
               </Button>
 
-              <div className="mt-6 flex items-center gap-3">
-                <span className="h-px flex-1 bg-[var(--line)]" />
-                <span className="text-xs font-semibold tracking-wide text-[var(--sea-ink-soft)]">
-                  or continue with email
-                </span>
-                <span className="h-px flex-1 bg-[var(--line)]" />
-              </div>
+              {/* 
+                <div className="mt-6 flex items-center gap-3">
+                  <span className="h-px flex-1 bg-[var(--line)]" />
+                  <span className="text-xs font-semibold tracking-wide text-[var(--sea-ink-soft)]">
+                    or continue with email
+                  </span>
+                  <span className="h-px flex-1 bg-[var(--line)]" />
+                </div>
 
-              <Tabs defaultValue="sign-in" className="mt-5">
-                <TabsList className="w-full">
-                  <TabsTrigger value="sign-in" className="flex-1">
-                    Sign in
-                  </TabsTrigger>
-                  <TabsTrigger value="sign-up" className="flex-1">
-                    Create account
-                  </TabsTrigger>
-                </TabsList>
+                <Tabs defaultValue="sign-in" className="mt-5">
+                  <TabsList className="w-full">
+                    <TabsTrigger value="sign-in" className="flex-1">
+                      Sign in
+                    </TabsTrigger>
+                    <TabsTrigger value="sign-up" className="flex-1">
+                      Create account
+                    </TabsTrigger>
+                  </TabsList>
 
-                <TabsContent value="sign-in" className="mt-4">
-                  <Form {...signInForm}>
-                    <form
-                      onSubmit={(event) => void onSignIn(event)}
-                      className="grid gap-4"
-                      noValidate
-                    >
-                      <FormField
-                        control={signInForm.control}
-                        name="email"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Email</FormLabel>
-                            <FormControl>
-                              <Input
-                                type="email"
-                                autoComplete="email"
-                                placeholder="you@example.com"
-                                {...field}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={signInForm.control}
-                        name="password"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Password</FormLabel>
-                            <FormControl>
-                              <Input
-                                type="password"
-                                autoComplete="current-password"
-                                {...field}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <Button
-                        type="submit"
-                        className="mt-1 w-full"
-                        disabled={signInForm.formState.isSubmitting}
+                  <TabsContent value="sign-in" className="mt-4">
+                    <Form {...signInForm}>
+                      <form
+                        onSubmit={(event) => void onSignIn(event)}
+                        className="grid gap-4"
+                        noValidate
                       >
-                        {signInForm.formState.isSubmitting
-                          ? 'Signing in…'
-                          : 'Sign in'}
-                      </Button>
-                    </form>
-                  </Form>
-                </TabsContent>
-
-                <TabsContent value="sign-up" className="mt-4">
-                  <Form {...signUpForm}>
-                    <form
-                      onSubmit={(event) => void onSignUp(event)}
-                      className="grid gap-4"
-                      noValidate
-                    >
-                      <div className="grid gap-4 sm:grid-cols-2">
                         <FormField
-                          control={signUpForm.control}
-                          name="firstName"
+                          control={signInForm.control}
+                          name="email"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>First name</FormLabel>
+                              <FormLabel>Email</FormLabel>
                               <FormControl>
-                                <Input autoComplete="given-name" {...field} />
+                                <Input
+                                  type="email"
+                                  autoComplete="email"
+                                  placeholder="you@example.com"
+                                  {...field}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={signInForm.control}
+                          name="password"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Password</FormLabel>
+                              <FormControl>
+                                <Input
+                                  type="password"
+                                  autoComplete="current-password"
+                                  {...field}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <Button
+                          type="submit"
+                          className="mt-1 w-full"
+                          disabled={signInForm.formState.isSubmitting}
+                        >
+                          {signInForm.formState.isSubmitting
+                            ? 'Signing in…'
+                            : 'Sign in'}
+                        </Button>
+                      </form>
+                    </Form>
+                  </TabsContent>
+
+                  <TabsContent value="sign-up" className="mt-4">
+                    <Form {...signUpForm}>
+                      <form
+                        onSubmit={(event) => void onSignUp(event)}
+                        className="grid gap-4"
+                        noValidate
+                      >
+                        <div className="grid gap-4 sm:grid-cols-2">
+                          <FormField
+                            control={signUpForm.control}
+                            name="firstName"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>First name</FormLabel>
+                                <FormControl>
+                                  <Input autoComplete="given-name" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={signUpForm.control}
+                            name="lastName"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Last name</FormLabel>
+                                <FormControl>
+                                  <Input autoComplete="family-name" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                        <FormField
+                          control={signUpForm.control}
+                          name="email"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Email</FormLabel>
+                              <FormControl>
+                                <Input
+                                  type="email"
+                                  autoComplete="email"
+                                  placeholder="you@example.com"
+                                  {...field}
+                                />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -219,66 +252,35 @@ function LoginPage() {
                         />
                         <FormField
                           control={signUpForm.control}
-                          name="lastName"
+                          name="password"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Last name</FormLabel>
+                              <FormLabel>Password</FormLabel>
                               <FormControl>
-                                <Input autoComplete="family-name" {...field} />
+                                <Input
+                                  type="password"
+                                  autoComplete="new-password"
+                                  {...field}
+                                />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
                           )}
                         />
-                      </div>
-                      <FormField
-                        control={signUpForm.control}
-                        name="email"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Email</FormLabel>
-                            <FormControl>
-                              <Input
-                                type="email"
-                                autoComplete="email"
-                                placeholder="you@example.com"
-                                {...field}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={signUpForm.control}
-                        name="password"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Password</FormLabel>
-                            <FormControl>
-                              <Input
-                                type="password"
-                                autoComplete="new-password"
-                                {...field}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <Button
-                        type="submit"
-                        className="mt-1 w-full"
-                        disabled={signUpForm.formState.isSubmitting}
-                      >
-                        {signUpForm.formState.isSubmitting
-                          ? 'Creating account…'
-                          : 'Create account'}
-                      </Button>
-                    </form>
-                  </Form>
-                </TabsContent>
-              </Tabs>
+                        <Button
+                          type="submit"
+                          className="mt-1 w-full"
+                          disabled={signUpForm.formState.isSubmitting}
+                        >
+                          {signUpForm.formState.isSubmitting
+                            ? 'Creating account…'
+                            : 'Create account'}
+                        </Button>
+                      </form>
+                    </Form>
+                  </TabsContent>
+                </Tabs> 
+              */}
             </>
           )}
         </div>
