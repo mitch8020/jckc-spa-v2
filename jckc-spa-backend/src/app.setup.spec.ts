@@ -1,6 +1,6 @@
 import { ConfigService } from '@nestjs/config';
 import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
-import { configureApp } from './app.setup';
+import { appHelmetOptions, configureApp } from './app.setup';
 
 const mockToNodeHandler = jest.fn((auth: unknown) => ({ auth }));
 
@@ -49,6 +49,11 @@ describe('configureApp', () => {
     expect(app.enableCors).toHaveBeenCalledWith({
       origin: ['http://localhost:3000', 'http://127.0.0.1:3000'],
       credentials: true,
+    });
+    expect(appHelmetOptions.contentSecurityPolicy).toMatchObject({
+      directives: {
+        scriptSrc: ["'self'", "'unsafe-inline'"],
+      },
     });
     expect(mockToNodeHandler).toHaveBeenCalledWith(auth);
     expect(expressApp.set).toHaveBeenCalledWith('trust proxy', 1);

@@ -5,6 +5,7 @@ import { toNodeHandler } from 'better-auth/node';
 import express from 'express';
 import type { NextFunction, Request, Response } from 'express';
 import helmet from 'helmet';
+import type { HelmetOptions } from 'helmet';
 import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
 import { resolveAuthBaseURL } from './config/auth-base-url';
 import { resolveFrontendOrigins } from './config/frontend-origins';
@@ -13,6 +14,15 @@ import type { AuthInstance } from './modules/auth/auth.provider';
 import { mountFrontend } from './frontend.setup';
 
 const SAFE_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
+
+export const appHelmetOptions: HelmetOptions = {
+  contentSecurityPolicy: {
+    directives: {
+      // TanStack Start and next-themes emit inline bootstrap/hydration scripts.
+      scriptSrc: ["'self'", "'unsafe-inline'"],
+    },
+  },
+};
 
 function resolveAllowedUnsafeOrigins(
   frontendOrigins: string[],
@@ -91,7 +101,7 @@ export function configureApp(app: NestExpressApplication): void {
     config.getOrThrow<string>('BETTER_AUTH_URL'),
   );
 
-  app.use(helmet());
+  app.use(helmet(appHelmetOptions));
   app.enableCors({
     origin: frontendOrigins,
     credentials: true,
