@@ -2,20 +2,25 @@ import { useMemo, useState } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Link, createFileRoute, redirect } from '@tanstack/react-router'
 import { useForm } from 'react-hook-form'
-import {
-  CheckIcon,
-  SearchIcon,
-  UserRoundPlusIcon,
-  UsersRoundIcon,
-} from 'lucide-react'
+import { CheckIcon, UserRoundPlusIcon, UsersRoundIcon } from 'lucide-react'
 import { toast } from 'sonner'
 import { z } from 'zod'
 import { useGuardian, useGuardians } from '#/api/guardians'
 import { useCreateStudent } from '#/api/students'
 import { FormSection } from '#/components/FormSection'
 import { PageHeader } from '#/components/PageHeader'
+import { SurfaceCard } from '#/components/SurfaceCard'
 import { Button } from '#/components/ui/button'
 import { Checkbox } from '#/components/ui/checkbox'
+import { FieldGroup } from '#/components/ui/field'
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from '#/components/ui/command'
 import {
   Form,
   FormControl,
@@ -34,7 +39,6 @@ import {
 } from '#/routes/_authed/guardians/-guardian-form'
 import { DEFAULT_STATE } from '#/lib/age'
 import { useSessionUser } from '#/lib/session'
-import { cn } from '#/lib/utils'
 import {
   EMPTY_STUDENT_VALUES,
   StudentFields,
@@ -206,17 +210,17 @@ function NewStudentPage() {
   const selectedGuardian = selectedGuardianQuery.data
 
   return (
-    <div className="space-y-8">
+    <div className="flex flex-col gap-8">
       <PageHeader kicker="New enrollment" title="Student Registration" />
 
       <Form {...form}>
         <form
           onSubmit={(event) => void onSubmit(event)}
-          className="space-y-6"
+          className="flex flex-col gap-6"
           noValidate
         >
-          <div
-            className="island-shell rise-in rounded-3xl p-6 sm:p-8"
+          <SurfaceCard
+            className="rise-in rounded-3xl p-6 sm:p-8"
             style={{ animationDelay: '80ms' }}
           >
             <FormSection
@@ -226,10 +230,10 @@ function NewStudentPage() {
             >
               <StudentFields control={form.control} />
             </FormSection>
-          </div>
+          </SurfaceCard>
 
-          <div
-            className="island-shell rise-in rounded-3xl p-6 sm:p-8"
+          <SurfaceCard
+            className="rise-in rounded-3xl p-6 sm:p-8"
             style={{ animationDelay: '120ms' }}
           >
             <FormSection
@@ -253,66 +257,53 @@ function NewStudentPage() {
                   </TabsList>
 
                   <TabsContent value="new" className="mt-4">
-                    <div className="grid gap-5 sm:grid-cols-2">
+                    <FieldGroup className="grid gap-5 sm:grid-cols-2">
                       <GuardianPersonalFields control={form.control} />
-                    </div>
+                    </FieldGroup>
                   </TabsContent>
 
-                  <TabsContent value="existing" className="mt-4 space-y-4">
-                    <div className="overflow-hidden rounded-2xl border border-[var(--line)] bg-[var(--surface)]">
-                      <div className="relative border-b border-[var(--line)]">
-                        <SearchIcon
-                          className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-[var(--sea-ink-soft)]"
-                          aria-hidden
-                        />
-                        <input
-                          type="text"
-                          value={pickerQuery}
-                          onChange={(event) =>
-                            setPickerQuery(event.target.value)
-                          }
-                          placeholder="Search parents / guardians by name..."
-                          aria-label="Search parents / guardians"
-                          className="h-11 w-full bg-transparent pr-3 pl-9 text-sm text-[var(--sea-ink)] outline-none placeholder:text-[var(--sea-ink-soft)]"
-                        />
-                      </div>
-                      <ul
-                        role="listbox"
-                        aria-label="Parents / guardians"
-                        className="max-h-64 overflow-y-auto p-1.5"
-                      >
+                  <TabsContent
+                    value="existing"
+                    className="mt-4 flex flex-col gap-4"
+                  >
+                    <Command
+                      shouldFilter={false}
+                      className="rounded-2xl border border-[var(--line)] bg-[var(--surface)]"
+                    >
+                      <CommandInput
+                        value={pickerQuery}
+                        onValueChange={setPickerQuery}
+                        placeholder="Search parents / guardians by name..."
+                        aria-label="Search parents / guardians"
+                      />
+                      <CommandList className="max-h-64">
                         {guardiansQuery.isPending ? (
-                          <li className="space-y-1.5 px-1.5 py-1.5">
+                          <CommandGroup>
                             <Skeleton className="h-8 w-full" />
                             <Skeleton className="h-8 w-full" />
                             <Skeleton className="h-8 w-full" />
-                          </li>
+                          </CommandGroup>
                         ) : filteredGuardians.length === 0 ? (
-                          <li className="px-3 py-6 text-center text-sm text-[var(--sea-ink-soft)]">
+                          <CommandEmpty>
                             {pickerQuery.trim()
                               ? `No matches for "${pickerQuery.trim()}"`
                               : 'No parents / guardians available.'}
-                          </li>
+                          </CommandEmpty>
                         ) : (
-                          filteredGuardians.map((option) => {
-                            const selected = option.id === selectedGuardianId
-                            return (
-                              <li key={option.id}>
-                                <button
-                                  type="button"
-                                  role="option"
-                                  aria-selected={selected}
-                                  onClick={() =>
+                          <CommandGroup>
+                            {filteredGuardians.map((option) => {
+                              const selected = option.id === selectedGuardianId
+                              return (
+                                <CommandItem
+                                  key={option.id}
+                                  value={`${option.guardianFirstName} ${option.guardianLastName}`}
+                                  onSelect={() =>
                                     form.setValue('guardianId', option.id, {
                                       shouldDirty: true,
                                       shouldValidate: true,
                                     })
                                   }
-                                  className={cn(
-                                    'flex w-full items-center justify-between gap-2 rounded-xl px-3 py-2 text-left text-sm text-[var(--sea-ink)] hover:bg-[var(--link-bg-hover)]',
-                                    selected &&
-                                      'bg-[var(--link-bg-hover)] font-semibold',
-                                  )}
+                                  className="justify-between"
                                 >
                                   <span>
                                     {option.guardianFirstName}{' '}
@@ -320,17 +311,18 @@ function NewStudentPage() {
                                   </span>
                                   {selected ? (
                                     <CheckIcon
-                                      className="size-4 text-[var(--lagoon-deep)]"
+                                      data-icon="inline-end"
+                                      className="text-[var(--lagoon-deep)]"
                                       aria-hidden
                                     />
                                   ) : null}
-                                </button>
-                              </li>
-                            )
-                          })
+                                </CommandItem>
+                              )
+                            })}
+                          </CommandGroup>
                         )}
-                      </ul>
-                    </div>
+                      </CommandList>
+                    </Command>
                     {guardianIdError ? (
                       <p className="text-sm text-destructive">
                         {guardianIdError}
@@ -339,9 +331,9 @@ function NewStudentPage() {
 
                     {selectedGuardianId ? (
                       selectedGuardian ? (
-                        <div className="rounded-2xl border border-[var(--line)] bg-[var(--chip-bg)] px-5 py-1">
+                        <FieldGroup className="gap-0 rounded-2xl border border-[var(--line)] bg-[var(--chip-bg)] px-5 py-1">
                           <GuardianInfoList guardian={selectedGuardian} />
-                        </div>
+                        </FieldGroup>
                       ) : (
                         <Skeleton className="h-32 w-full rounded-2xl" />
                       )
@@ -356,10 +348,10 @@ function NewStudentPage() {
                 <GuardianPersonalFields control={form.control} />
               )}
             </FormSection>
-          </div>
+          </SurfaceCard>
 
-          <div
-            className="island-shell rise-in rounded-3xl p-6 sm:p-8"
+          <SurfaceCard
+            className="rise-in rounded-3xl p-6 sm:p-8"
             style={{ animationDelay: '160ms' }}
           >
             <FormSection
@@ -405,7 +397,7 @@ function NewStudentPage() {
                 )}
               />
             </FormSection>
-          </div>
+          </SurfaceCard>
 
           <div
             className="rise-in flex flex-col-reverse gap-2 sm:flex-row sm:justify-end"

@@ -12,10 +12,13 @@ import { EmptyState } from '#/components/EmptyState'
 import { PageHeader } from '#/components/PageHeader'
 import { PaginationBar } from '#/components/PaginationBar'
 import { SearchInput } from '#/components/SearchInput'
+import { SurfaceCard } from '#/components/SurfaceCard'
 import { Avatar, AvatarFallback, AvatarImage } from '#/components/ui/avatar'
+import { Badge } from '#/components/ui/badge'
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
   SelectTrigger,
   SelectValue,
@@ -125,7 +128,7 @@ function UsersPage() {
     : ''
 
   return (
-    <div className="space-y-8">
+    <div className="flex flex-col gap-8">
       <PageHeader kicker="Administration" title="User Accounts" />
 
       <div className="rise-in" style={{ animationDelay: '60ms' }}>
@@ -137,8 +140,8 @@ function UsersPage() {
         />
       </div>
 
-      <div
-        className="island-shell rise-in overflow-hidden rounded-3xl"
+      <SurfaceCard
+        className="rise-in overflow-hidden rounded-3xl py-0"
         style={{ animationDelay: '120ms' }}
       >
         <Table>
@@ -209,7 +212,7 @@ function UsersPage() {
             onPageChange={handlePageChange}
           />
         ) : null}
-      </div>
+      </SurfaceCard>
 
       <ConfirmDialog
         open={pendingChange !== null}
@@ -267,7 +270,11 @@ function UserRow({
               <p className="max-w-40 truncate font-semibold text-[var(--sea-ink)] sm:max-w-56">
                 {displayName}
               </p>
-              {isSelf ? <span className="pill pill-lagoon">You</span> : null}
+              {isSelf ? (
+                <Badge variant="outline" className="pill pill-lagoon">
+                  You
+                </Badge>
+              ) : null}
             </div>
             <p className="max-w-40 truncate text-xs text-[var(--sea-ink-soft)] md:hidden">
               {user.email}
@@ -285,22 +292,25 @@ function UserRow({
       </TableCell>
       <TableCell className={tableCellClass}>
         {rolePill ? (
-          <span className={cn('pill', rolePill.className)}>
+          <Badge variant="outline" className={cn('pill', rolePill.className)}>
             {rolePill.label}
-          </span>
+          </Badge>
         ) : (
-          <span className="pill pill-neutral">No role</span>
+          <Badge variant="outline" className="pill pill-neutral">
+            No role
+          </Badge>
         )}
       </TableCell>
       <TableCell className={cn(tableCellClass, 'hidden sm:table-cell')}>
-        <span
+        <Badge
+          variant="outline"
           className={cn(
             'pill',
             user.registrationStatus ? 'pill-palm' : 'pill-amber',
           )}
         >
           {user.registrationStatus ? 'Registered' : 'Pending'}
-        </span>
+        </Badge>
       </TableCell>
       <TableCell
         className={cn(
@@ -335,9 +345,11 @@ function UserRow({
               <SelectValue placeholder="No role" />
             </SelectTrigger>
             <SelectContent align="end">
-              <SelectItem value="parent">Parent</SelectItem>
-              <SelectItem value="teacher">Teacher</SelectItem>
-              <SelectItem value="admin">Admin</SelectItem>
+              <SelectGroup>
+                <SelectItem value="parent">Parent</SelectItem>
+                <SelectItem value="teacher">Teacher</SelectItem>
+                <SelectItem value="admin">Admin</SelectItem>
+              </SelectGroup>
             </SelectContent>
           </Select>
         </div>

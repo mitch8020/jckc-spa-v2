@@ -4,7 +4,14 @@ import { useClassrooms } from '#/api/classrooms'
 import { AgeGroupBadge } from '#/components/AgeGroupBadge'
 import { EmptyState } from '#/components/EmptyState'
 import { PageHeader } from '#/components/PageHeader'
+import { FeatureCard, SurfaceCard } from '#/components/SurfaceCard'
 import { Button } from '#/components/ui/button'
+import {
+  Field,
+  FieldContent,
+  FieldGroup,
+  FieldTitle,
+} from '#/components/ui/field'
 import { Skeleton } from '#/components/ui/skeleton'
 import { cn } from '#/lib/utils'
 import { useSessionUser } from '#/lib/session'
@@ -31,17 +38,17 @@ function ClassroomsSummaryPage() {
     )
   } else if (classroomsQuery.isError) {
     content = (
-      <div className="island-shell rise-in rounded-3xl">
+      <SurfaceCard className="rise-in rounded-3xl">
         <EmptyState
           icon={CircleAlertIcon}
           title="Something went wrong"
           message={classroomsQuery.error.message}
         />
-      </div>
+      </SurfaceCard>
     )
   } else if (classroomsQuery.data.length === 0) {
     content = (
-      <div className="island-shell rise-in rounded-3xl">
+      <SurfaceCard className="rise-in rounded-3xl">
         <EmptyState
           icon={SchoolIcon}
           message="No Classrooms Available"
@@ -49,13 +56,13 @@ function ClassroomsSummaryPage() {
             isAdmin ? (
               <Button variant="outline" asChild>
                 <Link to="/classrooms/new">
-                  <PlusIcon /> New Classroom
+                  <PlusIcon data-icon="inline-start" /> New Classroom
                 </Link>
               </Button>
             ) : undefined
           }
         />
-      </div>
+      </SurfaceCard>
     )
   } else {
     content = (
@@ -73,7 +80,7 @@ function ClassroomsSummaryPage() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="flex flex-col gap-8">
       <PageHeader
         kicker="Rooms & teachers"
         title="Classrooms Summary"
@@ -81,7 +88,7 @@ function ClassroomsSummaryPage() {
           isAdmin ? (
             <Button asChild>
               <Link to="/classrooms/new">
-                <PlusIcon /> New Classroom
+                <PlusIcon data-icon="inline-start" /> New Classroom
               </Link>
             </Button>
           ) : undefined
@@ -102,11 +109,11 @@ function ClassroomCard({
   index: number
 }) {
   return (
-    <article
-      className="feature-card rise-in flex flex-col rounded-3xl border border-[var(--line)]"
+    <FeatureCard
+      className="rise-in flex flex-col rounded-3xl py-0"
       style={{ animationDelay: `${80 + (index % 9) * 60}ms` }}
     >
-      <div className="flex flex-1 items-start gap-4 p-5">
+      <div className="flex flex-1 items-start gap-4 px-5 pt-5">
         <AgeGroupBadge
           ageGroup={classroom.ageGroup}
           variant="block"
@@ -125,22 +132,25 @@ function ClassroomCard({
             </h2>
             <AgeGroupBadge ageGroup={classroom.ageGroup} />
           </div>
-          <dl className="mt-2 space-y-1 text-sm text-[var(--sea-ink-soft)]">
-            <div className="flex gap-1.5">
-              <dt>Teacher:</dt>
-              <dd className="truncate font-semibold text-[var(--sea-ink)]">
-                {classroom.teacherName || '—'}
-              </dd>
-            </div>
-            <div className="flex gap-1.5">
-              <dt>No. of Students:</dt>
-              <dd className="font-semibold text-[var(--sea-ink)]">
-                {classroom.studentCount}
-              </dd>
-            </div>
-          </dl>
         </div>
       </div>
+      <div className="flex-1 px-10">
+        <FieldGroup className="mt-2 gap-1 text-sm text-[var(--sea-ink-soft)]">
+          <Field orientation="horizontal">
+            <FieldTitle>Teacher:</FieldTitle>
+            <FieldContent className="truncate font-semibold text-[var(--sea-ink)]">
+              {classroom.teacherName || '—'}
+            </FieldContent>
+          </Field>
+          <Field orientation="horizontal">
+            <FieldTitle>No. of Students:</FieldTitle>
+            <FieldContent className="font-semibold text-[var(--sea-ink)]">
+              {classroom.studentCount}
+            </FieldContent>
+          </Field>
+        </FieldGroup>
+      </div>
+                
 
       <div className="flex divide-x divide-[var(--line)] border-t border-[var(--line)]">
         <Link
@@ -163,6 +173,6 @@ function ClassroomCard({
           </Link>
         ) : null}
       </div>
-    </article>
+    </FeatureCard>
   )
 }

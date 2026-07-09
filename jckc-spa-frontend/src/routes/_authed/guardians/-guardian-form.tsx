@@ -8,10 +8,17 @@ import {
   FormLabel,
   FormMessage,
 } from '#/components/ui/form'
+import {
+  Field,
+  FieldContent,
+  FieldGroup,
+  FieldTitle,
+} from '#/components/ui/field'
 import { Input } from '#/components/ui/input'
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
   SelectTrigger,
   SelectValue,
@@ -133,11 +140,13 @@ export function GuardianPersonalFields<TValues extends GuardianInput>({
                 </SelectTrigger>
               </FormControl>
               <SelectContent className="max-h-72">
-                {US_STATE_CODES.map((code) => (
-                  <SelectItem key={code} value={code}>
-                    {code}
-                  </SelectItem>
-                ))}
+                <SelectGroup>
+                  {US_STATE_CODES.map((code) => (
+                    <SelectItem key={code} value={code}>
+                      {code}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
               </SelectContent>
             </Select>
             <FormMessage />
@@ -205,18 +214,19 @@ export function GuardianInfoList({
   ]
 
   return (
-    <dl className={cn('divide-y divide-[var(--line)]', className)}>
+    <FieldGroup
+      className={cn('gap-0 divide-y divide-[var(--line)]', className)}
+    >
       {rows.map(([label, value]) => (
-        <div
-          key={label}
-          className="grid gap-1 py-3.5 sm:grid-cols-[220px_1fr] sm:gap-4"
-        >
-          <dt className="text-sm font-semibold text-[var(--sea-ink-soft)]">
+        <Field orientation="responsive" key={label} className="py-3.5 sm:gap-4">
+          <FieldTitle className="text-sm font-semibold text-[var(--sea-ink-soft)]">
             {label}
-          </dt>
-          <dd className="text-sm font-medium text-[var(--sea-ink)]">{value}</dd>
-        </div>
+          </FieldTitle>
+          <FieldContent className="text-sm font-medium text-[var(--sea-ink)]">
+            {value}
+          </FieldContent>
+        </Field>
       ))}
-    </dl>
+    </FieldGroup>
   )
 }

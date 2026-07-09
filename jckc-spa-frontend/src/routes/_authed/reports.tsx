@@ -2,7 +2,10 @@ import { createFileRoute, redirect } from '@tanstack/react-router'
 import { ClipboardListIcon, DownloadIcon, Loader2Icon } from 'lucide-react'
 import { useDownloadReport } from '#/api/reports'
 import { PageHeader } from '#/components/PageHeader'
+import { SurfaceCard } from '#/components/SurfaceCard'
+import { Badge } from '#/components/ui/badge'
 import { Button } from '#/components/ui/button'
+import { Separator } from '#/components/ui/separator'
 import { useSessionUser } from '#/lib/session'
 import type { ReportKind } from '#/api/reports'
 import type { LucideIcon } from 'lucide-react'
@@ -45,17 +48,20 @@ function ReportsPage() {
   const download = useDownloadReport()
 
   return (
-    <div className="space-y-8">
+    <div className="flex flex-col gap-8">
       <PageHeader kicker="Reports" title="Reports Summary" />
 
-      <div
-        className="island-shell rise-in rounded-3xl p-6 sm:p-8"
+      <SurfaceCard
+        className="rise-in rounded-3xl p-6 sm:p-8"
         style={{ animationDelay: '80ms' }}
       >
         <div className="flex items-center gap-3">
-          <span className="flex size-10 shrink-0 items-center justify-center rounded-full border border-[var(--chip-line)] bg-[var(--chip-bg)] text-[var(--lagoon-deep)]">
-            <ClipboardListIcon className="size-5" aria-hidden />
-          </span>
+          <Badge
+            variant="outline"
+            className="size-10 shrink-0 rounded-full p-0"
+          >
+            <ClipboardListIcon aria-hidden />
+          </Badge>
           <div>
             <p className="island-kicker">Print &amp; go</p>
             <p className="text-sm text-[var(--sea-ink-soft)]">
@@ -65,7 +71,8 @@ function ReportsPage() {
           </div>
         </div>
 
-        <div className="mt-6 grid gap-6 border-t border-[var(--line)] pt-6 sm:grid-cols-2">
+        <Separator className="my-6 bg-[var(--line)]" />
+        <div className="grid gap-6 sm:grid-cols-2">
           {REPORT_CARDS.map((card, index) => {
             const isDownloading =
               download.isPending && download.variables === card.kind
@@ -82,9 +89,13 @@ function ReportsPage() {
                   onClick={() => download.mutate(card.kind)}
                 >
                   {isDownloading ? (
-                    <Loader2Icon className="animate-spin" aria-hidden />
+                    <Loader2Icon
+                      data-icon="inline-start"
+                      className="animate-spin"
+                      aria-hidden
+                    />
                   ) : (
-                    <card.icon aria-hidden />
+                    <card.icon data-icon="inline-start" aria-hidden />
                   )}
                   {isDownloading ? 'PREPARING…' : card.label}
                 </Button>
@@ -95,7 +106,7 @@ function ReportsPage() {
             )
           })}
         </div>
-      </div>
+      </SurfaceCard>
     </div>
   )
 }

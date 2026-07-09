@@ -6,7 +6,14 @@ import { AgeGroupBadge } from '#/components/AgeGroupBadge'
 import { tableCellClass, tableHeadClass } from '#/components/DataTable'
 import { EmptyState } from '#/components/EmptyState'
 import { PageHeader } from '#/components/PageHeader'
+import { SurfaceCard } from '#/components/SurfaceCard'
 import { Button } from '#/components/ui/button'
+import {
+  Field,
+  FieldContent,
+  FieldGroup,
+  FieldTitle,
+} from '#/components/ui/field'
 import { Skeleton } from '#/components/ui/skeleton'
 import {
   Table,
@@ -33,7 +40,7 @@ function ClassroomDetailsPage() {
 
   if (detailQuery.isPending) {
     return (
-      <div className="space-y-8">
+      <div className="flex flex-col gap-8">
         <PageHeader kicker="Classrooms" title="Classroom Details" />
         <div className="grid items-start gap-6 md:grid-cols-12">
           <Skeleton className="h-64 rounded-3xl md:col-span-5" />
@@ -48,9 +55,9 @@ function ClassroomDetailsPage() {
     const error = detailQuery.error
     const notFound = error instanceof ApiError && error.status === 404
     return (
-      <div className="space-y-8">
+      <div className="flex flex-col gap-8">
         <PageHeader kicker="Classrooms" title="Classroom Details" />
-        <div className="island-shell rise-in rounded-3xl">
+        <SurfaceCard className="rise-in rounded-3xl">
           <EmptyState
             icon={CircleAlertIcon}
             title={notFound ? 'Classroom not found' : 'Something went wrong'}
@@ -65,7 +72,7 @@ function ClassroomDetailsPage() {
               </Button>
             }
           />
-        </div>
+        </SurfaceCard>
       </div>
     )
   }
@@ -73,13 +80,13 @@ function ClassroomDetailsPage() {
   const { classroom, students } = detail
 
   return (
-    <div className="space-y-8">
+    <div className="flex flex-col gap-8">
       <PageHeader kicker="Classrooms" title="Classroom Details" />
 
       <div className="grid items-start gap-6 md:grid-cols-12">
         {/* Classroom Info */}
-        <section
-          className="island-shell rise-in rounded-3xl p-6 md:col-span-5"
+        <SurfaceCard
+          className="rise-in rounded-3xl p-6 md:col-span-5"
           style={{ animationDelay: '80ms' }}
         >
           <div className="flex flex-wrap items-center justify-between gap-3">
@@ -92,37 +99,43 @@ function ClassroomDetailsPage() {
                   to="/classrooms/$classroomId/edit"
                   params={{ classroomId }}
                 >
-                  <PencilIcon /> Edit Info
+                  <PencilIcon data-icon="inline-start" /> Edit Info
                 </Link>
               </Button>
             ) : null}
           </div>
 
-          <dl className="mt-4 divide-y divide-[var(--line)] text-sm">
-            <div className="flex items-center justify-between gap-4 py-3">
-              <dt className="text-[var(--sea-ink-soft)]">Classroom Name</dt>
-              <dd className="text-right font-semibold text-[var(--sea-ink)]">
+          <FieldGroup className="mt-4 gap-0 divide-y divide-[var(--line)] text-sm">
+            <Field orientation="horizontal" className="justify-between py-3">
+              <FieldTitle className="text-[var(--sea-ink-soft)]">
+                Classroom Name
+              </FieldTitle>
+              <FieldContent className="text-right font-semibold text-[var(--sea-ink)]">
                 {classroom.classroomName}
-              </dd>
-            </div>
-            <div className="flex items-center justify-between gap-4 py-3">
-              <dt className="text-[var(--sea-ink-soft)]">Age Group</dt>
-              <dd>
+              </FieldContent>
+            </Field>
+            <Field orientation="horizontal" className="justify-between py-3">
+              <FieldTitle className="text-[var(--sea-ink-soft)]">
+                Age Group
+              </FieldTitle>
+              <FieldContent className="text-right">
                 <AgeGroupBadge ageGroup={classroom.ageGroup} />
-              </dd>
-            </div>
-            <div className="flex items-center justify-between gap-4 py-3">
-              <dt className="text-[var(--sea-ink-soft)]">Teacher</dt>
-              <dd className="text-right font-semibold text-[var(--sea-ink)]">
+              </FieldContent>
+            </Field>
+            <Field orientation="horizontal" className="justify-between py-3">
+              <FieldTitle className="text-[var(--sea-ink-soft)]">
+                Teacher
+              </FieldTitle>
+              <FieldContent className="text-right font-semibold text-[var(--sea-ink)]">
                 {classroom.teacherName || '—'}
-              </dd>
-            </div>
-          </dl>
-        </section>
+              </FieldContent>
+            </Field>
+          </FieldGroup>
+        </SurfaceCard>
 
         {/* Assigned Students */}
-        <section
-          className="island-shell rise-in overflow-hidden rounded-3xl md:col-span-7"
+        <SurfaceCard
+          className="rise-in overflow-hidden rounded-3xl py-0 md:col-span-7"
           style={{ animationDelay: '160ms' }}
         >
           <div className="flex flex-wrap items-center justify-between gap-3 p-6 pb-4">
@@ -135,7 +148,7 @@ function ClassroomDetailsPage() {
                   to="/classrooms/$classroomId/roster"
                   params={{ classroomId }}
                 >
-                  <UsersRoundIcon /> Edit Student List
+                  <UsersRoundIcon data-icon="inline-start" /> Edit Student List
                 </Link>
               </Button>
             ) : null}
@@ -175,7 +188,7 @@ function ClassroomDetailsPage() {
               </TableBody>
             </Table>
           )}
-        </section>
+        </SurfaceCard>
       </div>
     </div>
   )

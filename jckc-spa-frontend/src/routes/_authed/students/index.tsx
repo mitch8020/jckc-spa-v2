@@ -23,10 +23,12 @@ import { PageHeader } from '#/components/PageHeader'
 import { PaginationBar } from '#/components/PaginationBar'
 import { SearchInput } from '#/components/SearchInput'
 import { StatusPill } from '#/components/StatusPill'
+import { SurfaceCard } from '#/components/SurfaceCard'
 import { Button } from '#/components/ui/button'
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
   SelectTrigger,
   SelectValue,
@@ -124,7 +126,7 @@ function AdminStudentsPage({ isAdmin }: { isAdmin: boolean }) {
       : `No ${params.status} students found`
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-6">
       <PageHeader
         kicker="Enrollment"
         title="Students Summary"
@@ -132,7 +134,7 @@ function AdminStudentsPage({ isAdmin }: { isAdmin: boolean }) {
           isAdmin ? (
             <Button asChild>
               <Link to="/students/new">
-                <PlusIcon /> New Student
+                <PlusIcon data-icon="inline-start" /> New Student
               </Link>
             </Button>
           ) : undefined
@@ -161,16 +163,18 @@ function AdminStudentsPage({ isAdmin }: { isAdmin: boolean }) {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="active">Active</SelectItem>
-              <SelectItem value="inactive">Inactive</SelectItem>
-              <SelectItem value="all">All Students</SelectItem>
+              <SelectGroup>
+                <SelectItem value="active">Active</SelectItem>
+                <SelectItem value="inactive">Inactive</SelectItem>
+                <SelectItem value="all">All Students</SelectItem>
+              </SelectGroup>
             </SelectContent>
           </Select>
         </div>
       </div>
 
-      <div
-        className="island-shell rise-in overflow-hidden rounded-3xl"
+      <SurfaceCard
+        className="rise-in overflow-hidden rounded-3xl py-0"
         style={{ animationDelay: '120ms' }}
         aria-busy={isTableUpdating}
       >
@@ -181,18 +185,20 @@ function AdminStudentsPage({ isAdmin }: { isAdmin: boolean }) {
                 className={tableHeadClass}
                 aria-sort={params.order === 'asc' ? 'ascending' : 'descending'}
               >
-                <button
+                <Button
                   type="button"
+                  variant="ghost"
+                  size="sm"
                   onClick={toggleOrder}
-                  className="inline-flex items-center gap-1 uppercase hover:text-[var(--sea-ink)]"
+                  className="h-auto px-0 py-0 text-[0.68rem] font-bold uppercase tracking-[0.14em] hover:bg-transparent hover:text-[var(--sea-ink)]"
                 >
                   Name
                   {params.order === 'asc' ? (
-                    <ArrowUpIcon className="size-3.5" aria-hidden />
+                    <ArrowUpIcon data-icon="inline-end" aria-hidden />
                   ) : (
-                    <ArrowDownIcon className="size-3.5" aria-hidden />
+                    <ArrowDownIcon data-icon="inline-end" aria-hidden />
                   )}
-                </button>
+                </Button>
               </TableHead>
               <TableHead className={cn(tableHeadClass, 'hidden lg:table-cell')}>
                 DOB
@@ -259,7 +265,7 @@ function AdminStudentsPage({ isAdmin }: { isAdmin: boolean }) {
             pendingPage={params.page}
           />
         ) : null}
-      </div>
+      </SurfaceCard>
     </div>
   )
 }
@@ -339,7 +345,8 @@ function StudentRow({
                 onClick={onApprove}
                 disabled={approving}
               >
-                <CheckIcon /> {approving ? 'Approving…' : 'Approve'}
+                <CheckIcon data-icon="inline-start" />{' '}
+                {approving ? 'Approving…' : 'Approve'}
               </Button>
             ) : null}
             <Link
@@ -370,11 +377,11 @@ function ParentStudentsPage() {
   const myQuery = useMyStudents()
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-6">
       <PageHeader kicker="Your family" title="Students" />
 
-      <section
-        className="island-shell rise-in overflow-hidden rounded-3xl"
+      <SurfaceCard
+        className="rise-in overflow-hidden rounded-3xl py-0"
         style={{ animationDelay: '80ms' }}
       >
         <div className="flex flex-wrap items-center justify-between gap-3 px-4 pt-5 pb-4 sm:px-6">
@@ -386,7 +393,7 @@ function ParentStudentsPage() {
           </div>
           <Button asChild size="sm">
             <Link to="/students/new">
-              <PlusIcon /> Register New Student
+              <PlusIcon data-icon="inline-start" /> Register New Student
             </Link>
           </Button>
         </div>
@@ -477,10 +484,10 @@ function ParentStudentsPage() {
             )}
           </TableBody>
         </Table>
-      </section>
+      </SurfaceCard>
 
-      <section
-        className="island-shell rise-in overflow-hidden rounded-3xl"
+      <SurfaceCard
+        className="rise-in overflow-hidden rounded-3xl py-0"
         style={{ animationDelay: '160ms' }}
       >
         <div className="px-4 pt-5 pb-4 sm:px-6">
@@ -554,7 +561,7 @@ function ParentStudentsPage() {
             )}
           </TableBody>
         </Table>
-      </section>
+      </SurfaceCard>
     </div>
   )
 }

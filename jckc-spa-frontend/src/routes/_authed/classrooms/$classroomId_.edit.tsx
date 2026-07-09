@@ -9,6 +9,7 @@ import { ApiError } from '#/api/client'
 import { ConfirmDialog } from '#/components/ConfirmDialog'
 import { EmptyState } from '#/components/EmptyState'
 import { PageHeader } from '#/components/PageHeader'
+import { SurfaceCard } from '#/components/SurfaceCard'
 import { Button } from '#/components/ui/button'
 import { Skeleton } from '#/components/ui/skeleton'
 import { ClassroomForm } from '#/routes/_authed/classrooms/-classroom-form'
@@ -32,10 +33,10 @@ function EditClassroomPage() {
 
   if (detailQuery.isPending) {
     return (
-      <div className="space-y-8">
+      <div className="flex flex-col gap-8">
         <PageHeader kicker="Classrooms" title="Edit Classroom Details" />
-        <div
-          className="island-shell rise-in max-w-xl rounded-3xl p-6 sm:p-8"
+        <SurfaceCard
+          className="rise-in max-w-xl rounded-3xl p-6 sm:p-8"
           style={{ animationDelay: '80ms' }}
         >
           <Skeleton className="h-6 w-48" />
@@ -44,7 +45,7 @@ function EditClassroomPage() {
             <Skeleton className="h-9 w-full" />
             <Skeleton className="h-9 w-full" />
           </div>
-        </div>
+        </SurfaceCard>
       </div>
     )
   }
@@ -54,9 +55,9 @@ function EditClassroomPage() {
     const error = detailQuery.error
     const notFound = error instanceof ApiError && error.status === 404
     return (
-      <div className="space-y-8">
+      <div className="flex flex-col gap-8">
         <PageHeader kicker="Classrooms" title="Edit Classroom Details" />
-        <div className="island-shell rise-in rounded-3xl">
+        <SurfaceCard className="rise-in rounded-3xl">
           <EmptyState
             icon={CircleAlertIcon}
             title={notFound ? 'Classroom not found' : 'Something went wrong'}
@@ -71,7 +72,7 @@ function EditClassroomPage() {
               </Button>
             }
           />
-        </div>
+        </SurfaceCard>
       </div>
     )
   }
@@ -86,7 +87,7 @@ function EditClassroomPage() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="flex flex-col gap-8">
       <PageHeader kicker="Classrooms" title="Edit Classroom Details" />
       <ClassroomForm
         heading="Edit Classroom Info"
@@ -119,8 +120,8 @@ function EditClassroomPage() {
         }}
       />
 
-      <section
-        className="island-shell rise-in max-w-xl rounded-3xl p-6 sm:p-8"
+      <SurfaceCard
+        className="rise-in max-w-xl rounded-3xl p-6 sm:p-8"
         style={{ animationDelay: '160ms' }}
       >
         <p className="island-kicker">Danger zone</p>
@@ -147,12 +148,12 @@ function EditClassroomPage() {
                 size="sm"
                 className="border-destructive/40 text-destructive hover:bg-destructive/10 hover:text-destructive"
               >
-                <Trash2Icon /> Delete Classroom
+                <Trash2Icon data-icon="inline-start" /> Delete Classroom
               </Button>
             }
           />
         </div>
-      </section>
+      </SurfaceCard>
     </div>
   )
 }

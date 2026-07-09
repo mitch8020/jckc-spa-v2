@@ -16,10 +16,12 @@ import { AgeGroupBadge } from '#/components/AgeGroupBadge'
 import { EmptyState } from '#/components/EmptyState'
 import { PageHeader } from '#/components/PageHeader'
 import { StatCard } from '#/components/StatCard'
+import { FeatureCard, SurfaceCard } from '#/components/SurfaceCard'
+import { Badge } from '#/components/ui/badge'
 import { Button } from '#/components/ui/button'
+// import { Separator } from '#/components/ui/separator'
 import { Skeleton } from '#/components/ui/skeleton'
 import { convertAge } from '#/lib/age'
-import { cn } from '#/lib/utils'
 import { useSessionUser } from '#/lib/session'
 import type { ReactNode } from 'react'
 import type {
@@ -58,7 +60,7 @@ function DashboardPage() {
   const isAdmin = role === 'admin'
 
   return (
-    <div className="space-y-8">
+    <div className="flex flex-col gap-8">
       <PageHeader
         kicker="Overview"
         title={TITLE_BY_ROLE[role] ?? 'Dashboard'}
@@ -66,7 +68,7 @@ function DashboardPage() {
           isAdmin ? (
             <Button asChild>
               <Link to="/students/new">
-                <PlusIcon /> New Student
+                <PlusIcon data-icon="inline-start" /> New Student
               </Link>
             </Button>
           ) : undefined
@@ -80,8 +82,8 @@ function DashboardPage() {
           <StaffDashboard data={data} isAdmin={isAdmin} />
         )
       ) : error ? (
-        <div
-          className="island-shell rise-in rounded-3xl"
+        <SurfaceCard
+          className="rise-in rounded-3xl"
           style={{ animationDelay: '80ms' }}
         >
           <EmptyState
@@ -94,7 +96,7 @@ function DashboardPage() {
               </Button>
             }
           />
-        </div>
+        </SurfaceCard>
       ) : (
         <DashboardSkeleton />
       )}
@@ -149,8 +151,8 @@ function StaffDashboard({
   ]
 
   return (
-    <div className="space-y-10">
-      <section className="space-y-4">
+    <div className="flex flex-col gap-10">
+      <section className="flex flex-col gap-4">
         <SectionHeading title="Students Summary" />
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
           {statItems.map((item, index) => (
@@ -166,21 +168,21 @@ function StaffDashboard({
         </div>
       </section>
 
-      <section className="space-y-4">
+      <section className="flex flex-col gap-4">
         <SectionHeading
           title="Classrooms Summary"
           action={
             isAdmin ? (
               <Button asChild variant="outline" size="sm">
                 <Link to="/classrooms">
-                  <PencilIcon /> Edit
+                  <PencilIcon data-icon="inline-start" /> Edit
                 </Link>
               </Button>
             ) : undefined
           }
         />
         {classrooms.length === 0 ? (
-          <div className="island-shell rise-in rounded-3xl">
+          <SurfaceCard className="rise-in rounded-3xl">
             <EmptyState
               title="No classrooms yet"
               message={
@@ -196,7 +198,7 @@ function StaffDashboard({
                 ) : undefined
               }
             />
-          </div>
+          </SurfaceCard>
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {classrooms.map((classroom, index) => (
@@ -226,15 +228,15 @@ function ClassroomTile({
   index: number
 }) {
   return (
-    <div
-      className="island-shell feature-card rise-in flex overflow-hidden rounded-2xl"
+    <FeatureCard
+      className="rise-in flex overflow-hidden rounded-2xl py-0"
       style={{ animationDelay: `${80 + index * 60}ms` }}
     >
-      <AgeGroupBadge
+      {/* <AgeGroupBadge
         ageGroup={classroom.ageGroup}
         variant="block"
         className="h-auto w-14 shrink-0 self-stretch rounded-none"
-      />
+      /> */}
       <div className="min-w-0 flex-1 p-4">
         <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
           <Link
@@ -256,7 +258,7 @@ function ClassroomTile({
           </span>
         </p>
       </div>
-    </div>
+    </FeatureCard>
   )
 }
 
@@ -272,11 +274,11 @@ function ParentDashboard({ data }: { data: ParentDashboardDto }) {
   ]
 
   return (
-    <section className="space-y-4">
+    <section className="flex flex-col gap-4">
       <SectionHeading title="My Students" />
       {students.length === 0 ? (
-        <div
-          className="island-shell rise-in rounded-3xl"
+        <SurfaceCard
+          className="rise-in rounded-3xl"
           style={{ animationDelay: '80ms' }}
         >
           <EmptyState
@@ -286,12 +288,12 @@ function ParentDashboard({ data }: { data: ParentDashboardDto }) {
             action={
               <Button asChild>
                 <Link to="/students/new">
-                  <PlusIcon /> Register New Student
+                  <PlusIcon data-icon="inline-start" /> Register New Student
                 </Link>
               </Button>
             }
           />
-        </div>
+        </SurfaceCard>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {students.map(({ student, pending: isPending }, index) => (
@@ -318,8 +320,8 @@ function StudentCard({
   index: number
 }) {
   return (
-    <div
-      className="island-shell feature-card rise-in rounded-2xl p-5"
+    <FeatureCard
+      className="rise-in rounded-2xl p-5"
       style={{ animationDelay: `${80 + index * 60}ms` }}
     >
       <div className="flex items-start justify-between gap-3">
@@ -331,9 +333,12 @@ function StudentCard({
             {convertAge(student.dateOfBirth)}
           </p>
         </div>
-        <span className={cn('pill', pending ? 'pill-amber' : 'pill-palm')}>
+        <Badge
+          variant="outline"
+          className={pending ? 'pill pill-amber' : 'pill pill-palm'}
+        >
           {pending ? 'Pending' : 'Registered'}
-        </span>
+        </Badge>
       </div>
       <div className="mt-4 border-t border-[var(--line)] pt-3 text-sm">
         {student.classroom ? (
@@ -349,7 +354,7 @@ function StudentCard({
           <p className="text-[var(--sea-ink-soft)] italic">Not yet assigned</p>
         )}
       </div>
-    </div>
+    </FeatureCard>
   )
 }
 
@@ -366,9 +371,12 @@ function SectionHeading({
 }) {
   return (
     <div className="rise-in flex flex-wrap items-center justify-between gap-3">
-      <h2 className="display-title text-xl font-semibold text-[var(--sea-ink)] sm:text-2xl">
-        {title}
-      </h2>
+      <div>
+        <h2 className="display-title text-xl font-semibold text-[var(--sea-ink)] sm:text-2xl">
+          {title}
+        </h2>
+        {/* <Separator className="mt-2 w-12 bg-[var(--line)]" /> */}
+      </div>
       {action ?? null}
     </div>
   )
@@ -376,8 +384,8 @@ function SectionHeading({
 
 function DashboardSkeleton() {
   return (
-    <div className="space-y-10">
-      <div className="space-y-4">
+    <div className="flex flex-col gap-10">
+      <div className="flex flex-col gap-4">
         <Skeleton className="h-7 w-44" />
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
           {Array.from({ length: 5 }, (_, index) => (
@@ -385,7 +393,7 @@ function DashboardSkeleton() {
           ))}
         </div>
       </div>
-      <div className="space-y-4">
+      <div className="flex flex-col gap-4">
         <Skeleton className="h-7 w-48" />
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 3 }, (_, index) => (

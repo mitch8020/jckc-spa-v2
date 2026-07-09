@@ -6,7 +6,9 @@ import { toast } from 'sonner'
 import { z } from 'zod'
 import { useRegisterUser } from '#/api/users'
 import { authClient } from '#/lib/auth-client'
+import { SurfaceCard } from '#/components/SurfaceCard'
 import { Button } from '#/components/ui/button'
+import { FieldGroup } from '#/components/ui/field'
 import {
   Form,
   FormControl,
@@ -19,6 +21,7 @@ import { Input } from '#/components/ui/input'
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
   SelectTrigger,
   SelectValue,
@@ -107,7 +110,7 @@ function RegisterPage() {
       />
 
       <div className="rise-in w-full max-w-lg">
-        <div className="island-shell rounded-3xl p-8 sm:p-10">
+        <SurfaceCard className="rounded-3xl p-8 sm:p-10">
           <p className="island-kicker text-center">One last step</p>
           <h1 className="display-title mt-2 text-center text-3xl font-semibold text-[var(--sea-ink)]">
             Register your JCKC account
@@ -120,113 +123,116 @@ function RegisterPage() {
           ) : null}
 
           <Form {...form}>
-            <form
-              onSubmit={(event) => void onSubmit(event)}
-              className="mt-8 grid gap-4"
-              noValidate
-            >
-              <div className="grid gap-4 sm:grid-cols-2">
-                <FormField
-                  control={form.control}
-                  name="firstName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>First name</FormLabel>
-                      <FormControl>
-                        <Input autoComplete="given-name" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="lastName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Last name</FormLabel>
-                      <FormControl>
-                        <Input autoComplete="family-name" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
+            <form onSubmit={(event) => void onSubmit(event)} noValidate>
+              <FieldGroup className="mt-8 gap-4">
+                <FieldGroup className="grid gap-4 sm:grid-cols-2">
+                  <FormField
+                    control={form.control}
+                    name="firstName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>First name</FormLabel>
+                        <FormControl>
+                          <Input autoComplete="given-name" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="lastName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Last name</FormLabel>
+                        <FormControl>
+                          <Input autoComplete="family-name" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </FieldGroup>
 
-              <FormField
-                control={form.control}
-                name="role"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Account type</FormLabel>
-                    <Select value={field.value} onValueChange={field.onChange}>
-                      <FormControl>
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Choose an account type" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="parent">Parent</SelectItem>
-                        <SelectItem value="teacher">Teacher</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <div className="grid gap-4 sm:grid-cols-2">
                 <FormField
                   control={form.control}
-                  name="dateOfBirth"
+                  name="role"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Date of birth</FormLabel>
-                      <FormControl>
-                        <Input type="date" autoComplete="bday" {...field} />
-                      </FormControl>
+                      <FormLabel>Account type</FormLabel>
+                      <Select
+                        value={field.value}
+                        onValueChange={field.onChange}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Choose an account type" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectGroup>
+                            <SelectItem value="parent">Parent</SelectItem>
+                            <SelectItem value="teacher">Teacher</SelectItem>
+                          </SelectGroup>
+                        </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-                <FormField
-                  control={form.control}
-                  name="phoneNumber"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Phone number</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="tel"
-                          autoComplete="tel"
-                          placeholder="423-555-0123"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
 
-              <div className="mt-2 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => void handleCancel()}
-                >
-                  Cancel &amp; sign out
-                </Button>
-                <Button type="submit" disabled={registerUser.isPending}>
-                  {registerUser.isPending
-                    ? 'Submitting…'
-                    : 'Complete registration'}
-                </Button>
-              </div>
+                <FieldGroup className="grid gap-4 sm:grid-cols-2">
+                  <FormField
+                    control={form.control}
+                    name="dateOfBirth"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Date of birth</FormLabel>
+                        <FormControl>
+                          <Input type="date" autoComplete="bday" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="phoneNumber"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Phone number</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="tel"
+                            autoComplete="tel"
+                            placeholder="423-555-0123"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </FieldGroup>
+
+                <div className="mt-2 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => void handleCancel()}
+                  >
+                    Cancel &amp; sign out
+                  </Button>
+                  <Button type="submit" disabled={registerUser.isPending}>
+                    {registerUser.isPending
+                      ? 'Submitting…'
+                      : 'Complete registration'}
+                  </Button>
+                </div>
+              </FieldGroup>
             </form>
           </Form>
-        </div>
+        </SurfaceCard>
       </div>
     </main>
   )

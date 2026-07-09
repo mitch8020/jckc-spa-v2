@@ -20,7 +20,14 @@ import {
 import { EmptyState } from '#/components/EmptyState'
 import { PageHeader } from '#/components/PageHeader'
 import { StatusPill } from '#/components/StatusPill'
+import { SurfaceCard } from '#/components/SurfaceCard'
 import { Button } from '#/components/ui/button'
+import {
+  Field,
+  FieldContent,
+  FieldGroup,
+  FieldTitle,
+} from '#/components/ui/field'
 import { Skeleton } from '#/components/ui/skeleton'
 import {
   Table,
@@ -77,12 +84,12 @@ function StudentDetailsPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-6">
       <PageHeader kicker="Enrollment" title="Student Details" />
 
       {/* Card 1 — Student Info */}
-      <section
-        className="island-shell rise-in rounded-3xl"
+      <SurfaceCard
+        className="rise-in rounded-3xl py-0"
         style={{ animationDelay: '80ms' }}
       >
         <div className="flex flex-wrap items-center justify-between gap-3 px-4 pt-5 pb-4 sm:px-6">
@@ -100,14 +107,14 @@ function StudentDetailsPage() {
                 className="text-destructive hover:bg-destructive/10 hover:text-destructive"
                 onClick={() => setConfirmOpen(true)}
               >
-                <Trash2Icon /> Delete
+                <Trash2Icon data-icon="inline-start" /> Delete
               </Button>
               <Button asChild>
                 <Link
                   to="/students/$studentId/edit"
                   params={{ studentId: student.id }}
                 >
-                  <PencilLineIcon /> Edit Info
+                  <PencilLineIcon data-icon="inline-start" /> Edit Info
                 </Link>
               </Button>
             </div>
@@ -115,7 +122,7 @@ function StudentDetailsPage() {
         </div>
 
         {studentQuery.isPending ? (
-          <div className="space-y-4 px-4 pb-6 sm:px-6">
+          <div className="flex flex-col gap-4 px-4 pb-6 sm:px-6">
             <Skeleton className="h-5 w-2/3" />
             <Skeleton className="h-5 w-1/2" />
             <Skeleton className="h-5 w-3/5" />
@@ -134,11 +141,11 @@ function StudentDetailsPage() {
         ) : (
           <StudentInfoList student={studentQuery.data} />
         )}
-      </section>
+      </SurfaceCard>
 
       {/* Card 2 — Parent / Guardian Info */}
-      <section
-        className="island-shell rise-in overflow-hidden rounded-3xl"
+      <SurfaceCard
+        className="rise-in overflow-hidden rounded-3xl py-0"
         style={{ animationDelay: '160ms' }}
       >
         <div className="flex flex-wrap items-center justify-between gap-3 px-4 pt-5 pb-4 sm:px-6">
@@ -154,7 +161,7 @@ function StudentDetailsPage() {
                 to="/students/$studentId/add-guardian"
                 params={{ studentId }}
               >
-                <PlusIcon /> Add Parent / Guardian
+                <PlusIcon data-icon="inline-start" /> Add Parent / Guardian
               </Link>
             </Button>
           ) : null}
@@ -169,7 +176,7 @@ function StudentDetailsPage() {
           isAdmin={isAdmin}
           studentId={studentId}
         />
-      </section>
+      </SurfaceCard>
 
       {student ? (
         <ConfirmDialog
@@ -188,20 +195,23 @@ function StudentDetailsPage() {
 
 function InfoRow({ label, children }: { label: string; children: ReactNode }) {
   return (
-    <div className="grid gap-1 border-t border-[var(--line)] px-4 py-4 sm:grid-cols-3 sm:gap-4 sm:px-6">
-      <dt className="text-sm font-semibold text-[var(--sea-ink-soft)]">
+    <Field
+      orientation="responsive"
+      className="border-t border-[var(--line)] px-4 py-4 sm:gap-4 sm:px-6"
+    >
+      <FieldTitle className="text-sm font-semibold text-[var(--sea-ink-soft)]">
         {label}
-      </dt>
-      <dd className="text-sm text-[var(--sea-ink)] sm:col-span-2">
+      </FieldTitle>
+      <FieldContent className="text-sm text-[var(--sea-ink)]">
         {children}
-      </dd>
-    </div>
+      </FieldContent>
+    </Field>
   )
 }
 
 function StudentInfoList({ student }: { student: StudentDto }) {
   return (
-    <dl className="pb-2">
+    <FieldGroup className="gap-0 pb-2">
       <InfoRow label="Student Name">
         <span className="font-semibold">
           {student.studentFirstName} {student.studentLastName}
@@ -231,7 +241,7 @@ function StudentInfoList({ student }: { student: StudentDto }) {
           ) : null}
         </span>
       </InfoRow>
-    </dl>
+    </FieldGroup>
   )
 }
 

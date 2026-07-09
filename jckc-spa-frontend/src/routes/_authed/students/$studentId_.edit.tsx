@@ -2,6 +2,7 @@ import { Link, createFileRoute, redirect } from '@tanstack/react-router'
 import { useStudent, useUpdateStudent } from '#/api/students'
 import { EmptyState } from '#/components/EmptyState'
 import { PageHeader } from '#/components/PageHeader'
+import { SurfaceCard } from '#/components/SurfaceCard'
 import { Button } from '#/components/ui/button'
 import { Skeleton } from '#/components/ui/skeleton'
 import { StudentForm } from './-student-form'
@@ -42,11 +43,11 @@ function EditStudentPage() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="flex flex-col gap-8">
       <PageHeader kicker="Enrollment" title="Edit Student Details" />
 
-      <div
-        className="island-shell rise-in max-w-2xl rounded-3xl p-6 sm:p-8"
+      <SurfaceCard
+        className="rise-in max-w-2xl rounded-3xl p-6 sm:p-8"
         style={{ animationDelay: '80ms' }}
       >
         <div className="mb-6">
@@ -103,7 +104,7 @@ function EditStudentPage() {
             }
           />
         )}
-      </div>
+      </SurfaceCard>
     </div>
   )
 }

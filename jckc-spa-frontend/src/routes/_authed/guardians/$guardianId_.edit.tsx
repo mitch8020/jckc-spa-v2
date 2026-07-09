@@ -8,8 +8,12 @@ import { useGuardian, useUpdateGuardian } from '#/api/guardians'
 import { EmptyState } from '#/components/EmptyState'
 import { FormSection } from '#/components/FormSection'
 import { PageHeader } from '#/components/PageHeader'
+import { SurfaceCard } from '#/components/SurfaceCard'
+import { Alert, AlertDescription, AlertTitle } from '#/components/ui/alert'
+import { Badge } from '#/components/ui/badge'
 import { Button } from '#/components/ui/button'
 import { Checkbox } from '#/components/ui/checkbox'
+import { Field, FieldGroup } from '#/components/ui/field'
 import {
   Form,
   FormControl,
@@ -135,13 +139,13 @@ function EditGuardianPage() {
 
   if (!guardian) {
     return (
-      <div className="space-y-8">
+      <div className="flex flex-col gap-8">
         <PageHeader
           kicker="Parents & Guardians"
           title="Edit Parent / Guardian Details"
         />
         {guardianQuery.isError ? (
-          <div className="island-shell rise-in rounded-3xl">
+          <SurfaceCard className="rise-in rounded-3xl">
             <EmptyState
               icon={UsersRoundIcon}
               title="Parent / guardian not found"
@@ -152,9 +156,9 @@ function EditGuardianPage() {
                 </Button>
               }
             />
-          </div>
+          </SurfaceCard>
         ) : (
-          <div className="island-shell rounded-3xl p-6 sm:p-8">
+          <SurfaceCard className="rounded-3xl p-6 sm:p-8">
             <Skeleton className="h-6 w-56" />
             <div className="mt-6 grid gap-5 sm:grid-cols-2">
               <Skeleton className="h-9 w-full" />
@@ -163,14 +167,14 @@ function EditGuardianPage() {
               <Skeleton className="h-9 w-full" />
               <Skeleton className="h-9 w-full" />
             </div>
-          </div>
+          </SurfaceCard>
         )}
       </div>
     )
   }
 
   return (
-    <div className="space-y-8">
+    <div className="flex flex-col gap-8">
       <PageHeader
         kicker="Parents & Guardians"
         title="Edit Parent / Guardian Details"
@@ -179,11 +183,11 @@ function EditGuardianPage() {
       <Form {...form}>
         <form
           onSubmit={(event) => void onSubmit(event)}
-          className="space-y-8"
+          className="flex flex-col gap-8"
           noValidate
         >
-          <div
-            className="island-shell rise-in rounded-3xl p-6 sm:p-8"
+          <SurfaceCard
+            className="rise-in rounded-3xl p-6 sm:p-8"
             style={{ animationDelay: '60ms' }}
           >
             <FormSection
@@ -193,10 +197,10 @@ function EditGuardianPage() {
             >
               <GuardianPersonalFields control={form.control} />
             </FormSection>
-          </div>
+          </SurfaceCard>
 
-          <div
-            className="island-shell rise-in rounded-3xl p-6 sm:p-8"
+          <SurfaceCard
+            className="rise-in rounded-3xl p-6 sm:p-8"
             style={{ animationDelay: '140ms' }}
           >
             <FormSection
@@ -206,18 +210,20 @@ function EditGuardianPage() {
               description="Update this parent / guardian's relationship and pickup permission for each assigned student."
             >
               {resolvedLinks.length === 0 ? (
-                <div className="rounded-2xl border border-dashed border-[var(--line)] px-6 py-10 text-center text-sm text-[var(--sea-ink-soft)]">
-                  No assigned students available to edit.
-                </div>
+                <EmptyState
+                  icon={UsersRoundIcon}
+                  message="No assigned students available to edit."
+                  className="rounded-2xl border border-dashed border-[var(--line)] px-6 py-10"
+                />
               ) : (
                 resolvedLinks.map((link, index) => {
                   const studentName = `${link.student.studentFirstName} ${link.student.studentLastName}`
                   return (
-                    <div
+                    <FieldGroup
                       key={link.studentId}
                       className="rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-5"
                     >
-                      <div className="grid gap-5 sm:grid-cols-2">
+                      <FieldGroup className="grid gap-5 sm:grid-cols-2">
                         <div className="grid content-start gap-2">
                           <span className="text-sm font-medium text-[var(--sea-ink)]">
                             Student
@@ -242,7 +248,7 @@ function EditGuardianPage() {
                             </FormItem>
                           )}
                         />
-                      </div>
+                      </FieldGroup>
                       <FormField
                         control={form.control}
                         name={`links.${index}.authorizedToPickUp`}
@@ -262,7 +268,7 @@ function EditGuardianPage() {
                           </FormItem>
                         )}
                       />
-                    </div>
+                    </FieldGroup>
                   )
                 })
               )}
@@ -271,7 +277,7 @@ function EditGuardianPage() {
             {danglingLinks.length > 0 ? (
               <UnresolvedLinksPanel links={danglingLinks} />
             ) : null}
-          </div>
+          </SurfaceCard>
 
           <div
             className="rise-in flex flex-col-reverse gap-2 sm:flex-row sm:justify-end"
@@ -302,54 +308,54 @@ function EditGuardianPage() {
  */
 function UnresolvedLinksPanel({ links }: { links: GuardianLinkDto[] }) {
   return (
-    <div
-      className="mt-8 rounded-2xl border p-5"
+    <Alert
+      className="mt-8 rounded-2xl"
       style={{
         background: 'color-mix(in oklab, var(--age-toddler) 9%, transparent)',
         borderColor: 'color-mix(in oklab, var(--age-toddler) 38%, transparent)',
       }}
     >
-      <div className="flex items-start gap-3">
-        <TriangleAlertIcon
-          className="mt-0.5 size-5 shrink-0"
-          style={{ color: 'var(--age-toddler-ink)' }}
-          aria-hidden
-        />
-        <div className="min-w-0 flex-1">
-          <h3 className="display-title text-base font-semibold text-[var(--sea-ink)]">
-            Unresolved Student Links
-          </h3>
-          <p className="mt-1 text-sm text-[var(--sea-ink-soft)]">
-            These links could not be matched to an active student record. They
-            are shown for reference and will be preserved unchanged when you
-            save.
-          </p>
-          <ul className="mt-3 space-y-2">
-            {links.map((link) => (
-              <li
-                key={link.studentId}
-                className="flex flex-wrap items-center gap-x-4 gap-y-1 rounded-xl border border-[var(--line)] bg-[var(--surface)] px-4 py-2.5 text-sm"
+      <TriangleAlertIcon
+        style={{ color: 'var(--age-toddler-ink)' }}
+        aria-hidden
+      />
+      <AlertTitle className="display-title text-base font-semibold text-[var(--sea-ink)]">
+        Unresolved Student Links
+      </AlertTitle>
+      <AlertDescription>
+        <p>
+          These links could not be matched to an active student record. They are
+          shown for reference and will be preserved unchanged when you save.
+        </p>
+        <FieldGroup className="mt-3 gap-2">
+          {links.map((link) => (
+            <Field
+              key={link.studentId}
+              orientation="responsive"
+              className="rounded-xl border border-[var(--line)] bg-[var(--surface)] px-4 py-2.5 text-sm"
+            >
+              <Badge
+                variant="outline"
+                className="font-mono text-xs text-[var(--sea-ink-soft)]"
               >
-                <code className="font-mono text-xs text-[var(--sea-ink-soft)]">
-                  {link.studentId}
-                </code>
-                <span className="text-[var(--sea-ink)]">
-                  Relationship:{' '}
-                  <span className="font-medium">
-                    {link.relationshipToStudent || 'Not set'}
-                  </span>
+                {link.studentId}
+              </Badge>
+              <span className="text-[var(--sea-ink)]">
+                Relationship:{' '}
+                <span className="font-medium">
+                  {link.relationshipToStudent || 'Not set'}
                 </span>
-                <span className="text-[var(--sea-ink)]">
-                  Authorized for pickup:{' '}
-                  <span className="font-medium">
-                    {link.authorizedToPickUp ? 'Yes' : 'No'}
-                  </span>
+              </span>
+              <span className="text-[var(--sea-ink)]">
+                Authorized for pickup:{' '}
+                <span className="font-medium">
+                  {link.authorizedToPickUp ? 'Yes' : 'No'}
                 </span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </div>
-    </div>
+              </span>
+            </Field>
+          ))}
+        </FieldGroup>
+      </AlertDescription>
+    </Alert>
   )
 }

@@ -6,7 +6,14 @@ import { z } from 'zod'
 import { useMe, useUpdateMe } from '#/api/users'
 import { EmptyState } from '#/components/EmptyState'
 import { PageHeader } from '#/components/PageHeader'
+import { SurfaceCard } from '#/components/SurfaceCard'
 import { Button } from '#/components/ui/button'
+import {
+  Field,
+  FieldDescription,
+  FieldGroup,
+  FieldLabel,
+} from '#/components/ui/field'
 import {
   Form,
   FormControl,
@@ -72,11 +79,11 @@ function ProfilePage() {
   const roleTitle = `${properNoun(user.role || 'your')} Profile`
 
   return (
-    <div className="space-y-8">
+    <div className="flex flex-col gap-8">
       <PageHeader kicker="Your account" title={roleTitle} />
 
-      <div
-        className="island-shell rise-in max-w-2xl rounded-3xl p-6 sm:p-8"
+      <SurfaceCard
+        className="rise-in max-w-2xl rounded-3xl p-6 sm:p-8"
         style={{ animationDelay: '80ms' }}
       >
         {meQuery.isPending ? (
@@ -106,91 +113,92 @@ function ProfilePage() {
           />
         ) : (
           <Form {...form}>
-            <form
-              onSubmit={(event) => void onSubmit(event)}
-              className="grid gap-5"
-              noValidate
-            >
-              {/* email comes from the auth account and is read-only */}
-              <div className="grid gap-2">
-                <p className="text-sm font-medium">Email</p>
-                <p className="flex h-9 items-center rounded-md border border-[var(--line)] bg-[var(--chip-bg)] px-3 text-sm text-[var(--sea-ink-soft)]">
-                  {me?.email ?? user.email}
-                </p>
-                <p className="text-xs text-[var(--sea-ink-soft)]">
-                  Your email is managed by your sign-in account.
-                </p>
-              </div>
+            <form onSubmit={(event) => void onSubmit(event)} noValidate>
+              <FieldGroup className="gap-5">
+                {/* email comes from the auth account and is read-only */}
+                <Field data-disabled>
+                  <FieldLabel>Email</FieldLabel>
+                  <Input
+                    value={me?.email ?? user.email}
+                    disabled
+                    readOnly
+                    className="text-[var(--sea-ink-soft)]"
+                  />
+                  <FieldDescription className="text-xs text-[var(--sea-ink-soft)]">
+                    Your email is managed by your sign-in account.
+                  </FieldDescription>
+                </Field>
 
-              <div className="grid gap-5 sm:grid-cols-2">
-                <FormField
-                  control={form.control}
-                  name="firstName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>First name</FormLabel>
-                      <FormControl>
-                        <Input autoComplete="given-name" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="lastName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Last name</FormLabel>
-                      <FormControl>
-                        <Input autoComplete="family-name" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="dateOfBirth"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Date of birth</FormLabel>
-                      <FormControl>
-                        <Input type="date" autoComplete="bday" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="phoneNumber"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Phone number</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="tel"
-                          autoComplete="tel"
-                          placeholder="423-555-0123"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
+                <FieldGroup className="grid gap-5 sm:grid-cols-2">
+                  <FormField
+                    control={form.control}
+                    name="firstName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>First name</FormLabel>
+                        <FormControl>
+                          <Input autoComplete="given-name" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="lastName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Last name</FormLabel>
+                        <FormControl>
+                          <Input autoComplete="family-name" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="dateOfBirth"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Date of birth</FormLabel>
+                        <FormControl>
+                          <Input type="date" autoComplete="bday" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="phoneNumber"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Phone number</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="tel"
+                            autoComplete="tel"
+                            placeholder="423-555-0123"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </FieldGroup>
 
-              <div className="flex justify-end">
-                <Button type="submit" disabled={updateMe.isPending}>
-                  {updateMe.isPending ? 'Saving…' : 'Save changes'}
-                </Button>
-              </div>
+                <div className="flex justify-end">
+                  <Button type="submit" disabled={updateMe.isPending}>
+                    {updateMe.isPending ? 'Saving…' : 'Save changes'}
+                  </Button>
+                </div>
+              </FieldGroup>
             </form>
           </Form>
         )}
-      </div>
+      </SurfaceCard>
     </div>
   )
 }

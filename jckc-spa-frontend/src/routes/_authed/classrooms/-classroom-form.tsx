@@ -2,6 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { FormSection } from '#/components/FormSection'
+import { SurfaceCard } from '#/components/SurfaceCard'
 import { Button } from '#/components/ui/button'
 import {
   Form,
@@ -15,6 +16,7 @@ import { Input } from '#/components/ui/input'
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
   SelectTrigger,
   SelectValue,
@@ -72,8 +74,8 @@ export function ClassroomForm({
   })
 
   return (
-    <div
-      className="island-shell rise-in max-w-xl rounded-3xl p-6 sm:p-8"
+    <SurfaceCard
+      className="rise-in max-w-xl rounded-3xl p-6 sm:p-8"
       style={{ animationDelay: '80ms' }}
     >
       <Form {...form}>
@@ -109,11 +111,13 @@ export function ClassroomForm({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {AGE_GROUP_OPTIONS.map((option) => (
-                        <SelectItem key={option.value} value={option.value}>
-                          {option.label}
-                        </SelectItem>
-                      ))}
+                      <SelectGroup>
+                        {AGE_GROUP_OPTIONS.map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -143,6 +147,6 @@ export function ClassroomForm({
           </div>
         </form>
       </Form>
-    </div>
+    </SurfaceCard>
   )
 }

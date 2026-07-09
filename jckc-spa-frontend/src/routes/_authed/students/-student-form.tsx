@@ -2,6 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { Button } from '#/components/ui/button'
+import { FieldGroup } from '#/components/ui/field'
 import {
   Form,
   FormControl,
@@ -14,6 +15,7 @@ import { Input } from '#/components/ui/input'
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
   SelectTrigger,
   SelectValue,
@@ -71,7 +73,7 @@ export function StudentFields<TValues extends StudentInput>({
 
   return (
     <>
-      <div className="grid gap-5 sm:col-span-2 sm:grid-cols-2">
+      <FieldGroup className="grid gap-5 sm:col-span-2 sm:grid-cols-2">
         <FormField
           control={c}
           name="studentFirstName"
@@ -98,7 +100,7 @@ export function StudentFields<TValues extends StudentInput>({
             </FormItem>
           )}
         />
-      </div>
+      </FieldGroup>
 
       <FormField
         control={c}
@@ -132,7 +134,7 @@ export function StudentFields<TValues extends StudentInput>({
         )}
       />
 
-      <div className="grid gap-5 sm:col-span-2 sm:grid-cols-3">
+      <FieldGroup className="grid gap-5 sm:col-span-2 sm:grid-cols-3">
         <FormField
           control={c}
           name="studentCity"
@@ -159,11 +161,13 @@ export function StudentFields<TValues extends StudentInput>({
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent className="max-h-72">
-                  {US_STATE_CODES.map((code) => (
-                    <SelectItem key={code} value={code}>
-                      {code}
-                    </SelectItem>
-                  ))}
+                  <SelectGroup>
+                    {US_STATE_CODES.map((code) => (
+                      <SelectItem key={code} value={code}>
+                        {code}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
                 </SelectContent>
               </Select>
               <FormMessage />
@@ -188,7 +192,7 @@ export function StudentFields<TValues extends StudentInput>({
             </FormItem>
           )}
         />
-      </div>
+      </FieldGroup>
     </>
   )
 }

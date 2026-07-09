@@ -12,8 +12,11 @@ import { EmptyState } from '#/components/EmptyState'
 import { PageHeader } from '#/components/PageHeader'
 import { PaginationBar } from '#/components/PaginationBar'
 import { SearchInput } from '#/components/SearchInput'
+import { SurfaceCard } from '#/components/SurfaceCard'
+import { Badge } from '#/components/ui/badge'
 import { Button } from '#/components/ui/button'
 import { Checkbox } from '#/components/ui/checkbox'
+import { Field, FieldGroup, FieldLabel } from '#/components/ui/field'
 import { Skeleton } from '#/components/ui/skeleton'
 import { convertAge } from '#/lib/age'
 import { cn } from '#/lib/utils'
@@ -93,9 +96,9 @@ function RosterPage() {
       rosterQuery.error?.message ??
       'Unable to load the classroom roster.'
     return (
-      <div className="space-y-8">
+      <div className="flex flex-col gap-8">
         <PageHeader kicker="Classroom roster" title="Add / Remove Students" />
-        <div className="island-shell rise-in rounded-3xl">
+        <SurfaceCard className="rise-in rounded-3xl">
           <EmptyState
             icon={CircleAlertIcon}
             title="Something went wrong"
@@ -106,7 +109,7 @@ function RosterPage() {
               </Button>
             }
           />
-        </div>
+        </SurfaceCard>
       </div>
     )
   }
@@ -142,7 +145,7 @@ function RosterPage() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="flex flex-col gap-8">
       <PageHeader
         kicker="Classroom roster"
         title="Add / Remove Students"
@@ -261,8 +264,8 @@ function RosterPane({
   animationDelay: string
 }) {
   return (
-    <section
-      className="island-shell rise-in flex flex-col overflow-hidden rounded-3xl"
+    <SurfaceCard
+      className="rise-in flex flex-col overflow-hidden rounded-3xl py-0"
       style={{ animationDelay }}
     >
       <div className="flex flex-wrap items-center justify-between gap-2 px-5 pt-5">
@@ -274,7 +277,9 @@ function RosterPane({
         </div>
         {selected.size > 0 ? (
           <div className="flex items-center gap-2">
-            <span className="pill pill-lagoon">{selected.size} selected</span>
+            <Badge variant="outline" className="pill pill-lagoon">
+              {selected.size} selected
+            </Badge>
             <Button
               type="button"
               variant="ghost"
@@ -292,7 +297,7 @@ function RosterPane({
       </div>
 
       {loading ? (
-        <div className="space-y-2 border-t border-[var(--line)] px-5 py-4">
+        <div className="flex flex-col gap-2 border-t border-[var(--line)] px-5 py-4">
           {[0, 1, 2, 3, 4].map((index) => (
             <Skeleton key={index} className="h-9 w-full" />
           ))}
@@ -308,17 +313,21 @@ function RosterPane({
           className="border-t border-[var(--line)] py-10"
         />
       ) : (
-        <ul
+        <FieldGroup
           className={cn(
-            'divide-y divide-[var(--line)] border-t border-[var(--line)] transition-opacity',
+            'gap-0 divide-y divide-[var(--line)] border-t border-[var(--line)] transition-opacity',
             fetching && 'opacity-60',
           )}
         >
           {pane.items.map((student) => (
-            <li key={student.id}>
-              <label
+            <Field
+              key={student.id}
+              orientation="horizontal"
+              className="justify-between gap-3 px-5 py-2.5 text-sm hover:bg-[var(--link-bg-hover)]"
+            >
+              <FieldLabel
                 htmlFor={`${idPrefix}-${student.id}`}
-                className="flex cursor-pointer items-center justify-between gap-3 px-5 py-2.5 text-sm hover:bg-[var(--link-bg-hover)]"
+                className="min-w-0 flex-1 cursor-pointer"
               >
                 <span className="min-w-0 truncate">
                   <span className="font-semibold text-[var(--sea-ink)]">
@@ -328,17 +337,17 @@ function RosterPane({
                     , {convertAge(student.dateOfBirth)}
                   </span>
                 </span>
-                <Checkbox
-                  id={`${idPrefix}-${student.id}`}
-                  checked={selected.has(student.id)}
-                  onCheckedChange={(checked) =>
-                    onToggle(student.id, checked === true)
-                  }
-                />
-              </label>
-            </li>
+              </FieldLabel>
+              <Checkbox
+                id={`${idPrefix}-${student.id}`}
+                checked={selected.has(student.id)}
+                onCheckedChange={(checked) =>
+                  onToggle(student.id, checked === true)
+                }
+              />
+            </Field>
           ))}
-        </ul>
+        </FieldGroup>
       )}
 
       {pane ? (
@@ -359,6 +368,6 @@ function RosterPane({
           {submitPending ? 'Working…' : submitLabel}
         </Button>
       </div>
-    </section>
+    </SurfaceCard>
   )
 }

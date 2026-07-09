@@ -16,6 +16,8 @@ import { ConfirmDialog } from '#/components/ConfirmDialog'
 import { tableCellClass, tableHeadClass } from '#/components/DataTable'
 import { EmptyState } from '#/components/EmptyState'
 import { PageHeader } from '#/components/PageHeader'
+import { SurfaceCard } from '#/components/SurfaceCard'
+import { Badge } from '#/components/ui/badge'
 import { Button } from '#/components/ui/button'
 import { Skeleton } from '#/components/ui/skeleton'
 import {
@@ -68,13 +70,13 @@ function GuardianDetailsPage() {
 
   if (!guardian) {
     return (
-      <div className="space-y-8">
+      <div className="flex flex-col gap-8">
         <PageHeader
           kicker="Parents & Guardians"
           title="Parent / Guardian Details"
         />
         {guardianQuery.isError ? (
-          <div className="island-shell rise-in rounded-3xl">
+          <SurfaceCard className="rise-in rounded-3xl">
             <EmptyState
               icon={UsersRoundIcon}
               title="Parent / guardian not found"
@@ -85,21 +87,21 @@ function GuardianDetailsPage() {
                 </Button>
               }
             />
-          </div>
+          </SurfaceCard>
         ) : (
           <>
-            <div className="island-shell rounded-3xl p-6 sm:p-8">
+            <SurfaceCard className="rounded-3xl p-6 sm:p-8">
               <Skeleton className="h-6 w-52" />
-              <div className="mt-6 space-y-3">
+              <div className="mt-6 flex flex-col gap-3">
                 <Skeleton className="h-5 w-full" />
                 <Skeleton className="h-5 w-2/3" />
                 <Skeleton className="h-5 w-1/2" />
               </div>
-            </div>
-            <div className="island-shell rounded-3xl p-6 sm:p-8">
+            </SurfaceCard>
+            <SurfaceCard className="rounded-3xl p-6 sm:p-8">
               <Skeleton className="h-6 w-44" />
               <Skeleton className="mt-6 h-32 w-full" />
-            </div>
+            </SurfaceCard>
           </>
         )}
       </div>
@@ -135,15 +137,15 @@ function GuardianDetailsPage() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="flex flex-col gap-8">
       <PageHeader
         kicker="Parents & Guardians"
         title="Parent / Guardian Details"
       />
 
       {/* Card 1 — Parent / Guardian Info */}
-      <section
-        className="island-shell rise-in rounded-3xl"
+      <SurfaceCard
+        className="rise-in rounded-3xl py-0"
         style={{ animationDelay: '60ms' }}
       >
         <header className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--line)] px-6 py-5 sm:px-8">
@@ -160,7 +162,7 @@ function GuardianDetailsPage() {
                 params={{ guardianId }}
                 search={{ from }}
               >
-                <PencilLineIcon /> Edit Info
+                <PencilLineIcon data-icon="inline-start" /> Edit Info
               </Link>
             </Button>
             <Button
@@ -169,18 +171,18 @@ function GuardianDetailsPage() {
               className="border-destructive/40 text-destructive hover:bg-destructive/10 hover:text-destructive"
               onClick={() => setConfirmingDelete(true)}
             >
-              <Trash2Icon /> Delete
+              <Trash2Icon data-icon="inline-start" /> Delete
             </Button>
           </div>
         </header>
         <div className="px-6 py-2 sm:px-8">
           <GuardianInfoList guardian={guardian} />
         </div>
-      </section>
+      </SurfaceCard>
 
       {/* Card 2 — Assigned Students */}
-      <section
-        className="island-shell rise-in overflow-hidden rounded-3xl"
+      <SurfaceCard
+        className="rise-in overflow-hidden rounded-3xl py-0"
         style={{ animationDelay: '140ms' }}
       >
         <header className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--line)] px-6 py-5 sm:px-8">
@@ -190,9 +192,9 @@ function GuardianDetailsPage() {
               Assigned Students
             </h2>
           </div>
-          <span className="pill pill-lagoon">
+          <Badge variant="outline" className="pill pill-lagoon">
             {linkCount} {linkCount === 1 ? 'student' : 'students'}
-          </span>
+          </Badge>
         </header>
 
         {linkCount === 0 ? (
@@ -292,7 +294,8 @@ function GuardianDetailsPage() {
                       {link.relationshipToStudent || '—'}
                     </TableCell>
                     <TableCell className={cn(tableCellClass, 'text-center')}>
-                      <span
+                      <Badge
+                        variant="outline"
                         className={cn(
                           'pill',
                           link.authorizedToPickUp
@@ -301,7 +304,7 @@ function GuardianDetailsPage() {
                         )}
                       >
                         {link.authorizedToPickUp ? 'Yes' : 'No'}
-                      </span>
+                      </Badge>
                     </TableCell>
                     <TableCell
                       className={cn(tableCellClass, 'px-6 text-right sm:px-8')}
@@ -312,7 +315,7 @@ function GuardianDetailsPage() {
                         className="text-destructive hover:bg-destructive/10 hover:text-destructive"
                         onClick={() => setRemovingLink(link)}
                       >
-                        <UnlinkIcon /> Remove link
+                        <UnlinkIcon data-icon="inline-start" /> Remove link
                       </Button>
                     </TableCell>
                   </TableRow>
@@ -321,7 +324,7 @@ function GuardianDetailsPage() {
             </TableBody>
           </Table>
         )}
-      </section>
+      </SurfaceCard>
 
       <ConfirmDialog
         open={confirmingDelete}

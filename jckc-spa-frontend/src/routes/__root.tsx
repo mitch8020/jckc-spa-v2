@@ -9,6 +9,7 @@ import { TanStackDevtools } from '@tanstack/react-devtools'
 import { HomeIcon, SearchXIcon } from 'lucide-react'
 import { ThemeProvider } from 'next-themes'
 import { EmptyState } from '#/components/EmptyState'
+import { SurfaceCard } from '#/components/SurfaceCard'
 import { Button } from '#/components/ui/button'
 import { Toaster } from '#/components/ui/sonner'
 import type { QueryClient } from '@tanstack/react-query'
@@ -63,7 +64,7 @@ export const Route = createRootRouteWithContext<RouterContext>()({
 function RootNotFound() {
   return (
     <main className="page-wrap flex min-h-screen items-center justify-center py-12">
-      <div className="island-shell w-full max-w-xl rounded-3xl">
+      <SurfaceCard className="w-full max-w-xl rounded-3xl">
         <EmptyState
           icon={SearchXIcon}
           title="Page not found"
@@ -71,12 +72,12 @@ function RootNotFound() {
           action={
             <Button asChild>
               <Link to="/">
-                <HomeIcon /> Go home
+                <HomeIcon data-icon="inline-start" /> Go home
               </Link>
             </Button>
           }
         />
-      </div>
+      </SurfaceCard>
     </main>
   )
 }

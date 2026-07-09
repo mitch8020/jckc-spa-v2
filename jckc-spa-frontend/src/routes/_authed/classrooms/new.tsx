@@ -19,7 +19,7 @@ function NewClassroomPage() {
   const createClassroom = useCreateClassroom()
 
   return (
-    <div className="space-y-8">
+    <div className="flex flex-col gap-8">
       <PageHeader kicker="Classrooms" title="Add New Classroom" />
       <ClassroomForm
         heading="New Classroom Form"
