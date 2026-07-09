@@ -1,3 +1,9 @@
+import {
+  FieldDescription,
+  FieldGroup,
+  FieldLegend,
+  FieldSet,
+} from '#/components/ui/field'
 import { cn } from '#/lib/utils'
 import type { ReactNode } from 'react'
 
@@ -22,21 +28,23 @@ export function FormSection({
   className?: string
 }) {
   return (
-    <section className={cn('space-y-5', className)}>
-      <div>
-        {kicker ? <p className="island-kicker">{kicker}</p> : null}
-        <h2 className="display-title mt-1 text-xl font-semibold text-[var(--sea-ink)]">
+    <FieldSet className={cn('gap-5', className)}>
+      <FieldLegend className="mb-0">
+        {kicker ? <span className="island-kicker block">{kicker}</span> : null}
+        <span className="display-title mt-1 block text-xl font-semibold text-[var(--sea-ink)]">
           {title}
-        </h2>
-        {description ? (
-          <p className="mt-1 text-sm text-[var(--sea-ink-soft)]">
-            {description}
-          </p>
-        ) : null}
-      </div>
-      <div className={cn('grid gap-5', columns === 2 && 'sm:grid-cols-2')}>
+        </span>
+      </FieldLegend>
+      {description ? (
+        <FieldDescription className="text-[var(--sea-ink-soft)]">
+          {description}
+        </FieldDescription>
+      ) : null}
+      <FieldGroup
+        className={cn('grid gap-5', columns === 2 && 'sm:grid-cols-2')}
+      >
         {children}
-      </div>
-    </section>
+      </FieldGroup>
+    </FieldSet>
   )
 }

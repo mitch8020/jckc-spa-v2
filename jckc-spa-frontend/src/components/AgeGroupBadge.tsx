@@ -1,4 +1,5 @@
 import { properNoun } from '#/lib/age'
+import { Badge } from '#/components/ui/badge'
 import { cn } from '#/lib/utils'
 
 const PILL_CLASS: Record<string, string> = {
@@ -32,21 +33,23 @@ export function AgeGroupBadge({
 
   if (variant === 'block') {
     return (
-      <span
+      <Badge
+        variant="outline"
         className={cn('monogram h-10 w-12 rounded-xl', className)}
         style={{ background: BLOCK_BG[group] ?? 'var(--sea-ink-soft)' }}
         aria-label={group ? properNoun(group) : 'No age group'}
       >
         {group ? group.substring(0, 3).toUpperCase() : '—'}
-      </span>
+      </Badge>
     )
   }
 
   return (
-    <span
+    <Badge
+      variant="outline"
       className={cn('pill', PILL_CLASS[group] ?? 'pill-neutral', className)}
     >
       {group ? properNoun(group) : 'Unassigned'}
-    </span>
+    </Badge>
   )
 }

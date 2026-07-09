@@ -1,6 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
 import { SearchIcon, XIcon } from 'lucide-react'
-import { Input } from '#/components/ui/input'
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput,
+} from '#/components/ui/input-group'
 import { cn } from '#/lib/utils'
 
 /**
@@ -56,25 +61,29 @@ export function SearchInput({
   }
 
   return (
-    <div className={cn('relative', className)}>
-      <SearchIcon className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-[var(--sea-ink-soft)]" />
-      <Input
+    <InputGroup className={className}>
+      <InputGroupInput
         type="text"
         value={text}
         onChange={(event) => handleChange(event.target.value)}
         placeholder={placeholder}
-        className="pr-9 pl-9"
+        className={cn(text && 'pr-1')}
       />
+      <InputGroupAddon align="inline-start">
+        <SearchIcon aria-hidden />
+      </InputGroupAddon>
       {text ? (
-        <button
-          type="button"
-          aria-label="Clear search"
-          onClick={handleClear}
-          className="absolute top-1/2 right-2 -translate-y-1/2 rounded-full p-1 text-[var(--sea-ink-soft)] hover:bg-[var(--link-bg-hover)] hover:text-[var(--sea-ink)]"
-        >
-          <XIcon className="size-3.5" />
-        </button>
+        <InputGroupAddon align="inline-end">
+          <InputGroupButton
+            type="button"
+            size="icon-xs"
+            aria-label="Clear search"
+            onClick={handleClear}
+          >
+            <XIcon aria-hidden />
+          </InputGroupButton>
+        </InputGroupAddon>
       ) : null}
-    </div>
+    </InputGroup>
   )
 }

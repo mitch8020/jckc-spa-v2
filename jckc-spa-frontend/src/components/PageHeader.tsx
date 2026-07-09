@@ -1,3 +1,4 @@
+import { Badge } from '#/components/ui/badge'
 import { cn } from '#/lib/utils'
 import type { ReactNode } from 'react'
 
@@ -24,7 +25,12 @@ export function PageHeader({
       )}
     >
       <div>
-        <p className="island-kicker">{kicker}</p>
+        <Badge
+          variant="secondary"
+          className="island-kicker h-auto rounded-full border border-[var(--chip-line)] bg-[var(--chip-bg)] px-2.5 py-1"
+        >
+          {kicker}
+        </Badge>
         <h1 className="display-title mt-1 text-3xl font-semibold text-[var(--sea-ink)] sm:text-4xl">
           {title}
         </h1>

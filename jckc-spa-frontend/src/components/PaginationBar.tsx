@@ -1,11 +1,13 @@
-import {
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  LoaderCircleIcon,
-} from 'lucide-react'
+import { LoaderCircleIcon } from 'lucide-react'
+import { Badge } from '#/components/ui/badge'
 import { Button } from '#/components/ui/button'
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+} from '#/components/ui/pagination'
 import { cn } from '#/lib/utils'
-import type { Pagination } from '#/api/types'
+import type { Pagination as PaginationDto } from '#/api/types'
 
 /**
  * Legacy-parity pagination footer: "Showing X to Y of Z {noun}" (sm+ only),
@@ -21,7 +23,7 @@ export function PaginationBar({
   pendingPage,
   className,
 }: {
-  pagination: Pagination
+  pagination: PaginationDto
   noun?: string
   onPageChange: (page: number) => void
   pending?: boolean
@@ -67,49 +69,58 @@ export function PaginationBar({
             Page {pagination.currentPage} of {pagination.totalPages}
           </p>
           {pending ? (
-            <p
+            <Badge
+              variant="outline"
               role="status"
               aria-live="polite"
-              className="inline-flex items-center gap-1.5 rounded-full border border-[var(--line)] bg-[var(--chip-bg)] px-2 py-0.5 text-xs font-semibold text-[var(--lagoon-deep)]"
+              className="pill pill-lagoon"
             >
-              <LoaderCircleIcon className="size-3 animate-spin" aria-hidden />
+              <LoaderCircleIcon
+                data-icon="inline-start"
+                className="animate-spin"
+                aria-hidden
+              />
               Updating
               <span className="sr-only">{pendingLabel}</span>
-            </p>
+            </Badge>
           ) : null}
         </div>
-        <div className="flex items-center gap-2">
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            disabled={pending || !pagination.hasPrevious}
-            onClick={() => onPageChange(previousPage)}
-            aria-label={
-              pagination.hasPrevious
-                ? `Previous page, page ${previousPage}`
-                : 'Previous page unavailable'
-            }
-          >
-            <ChevronLeftIcon />
-            Previous
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            disabled={pending || !pagination.hasNext}
-            onClick={() => onPageChange(nextPage)}
-            aria-label={
-              pagination.hasNext
-                ? `Next page, page ${nextPage}`
-                : 'Next page unavailable'
-            }
-          >
-            Next
-            <ChevronRightIcon />
-          </Button>
-        </div>
+        <Pagination className="mx-0 w-auto">
+          <PaginationContent>
+            <PaginationItem>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={pending || !pagination.hasPrevious}
+                onClick={() => onPageChange(previousPage)}
+                aria-label={
+                  pagination.hasPrevious
+                    ? `Previous page, page ${previousPage}`
+                    : 'Previous page unavailable'
+                }
+              >
+                Previous
+              </Button>
+            </PaginationItem>
+            <PaginationItem>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={pending || !pagination.hasNext}
+                onClick={() => onPageChange(nextPage)}
+                aria-label={
+                  pagination.hasNext
+                    ? `Next page, page ${nextPage}`
+                    : 'Next page unavailable'
+                }
+              >
+                Next
+              </Button>
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
       </div>
     </div>
   )

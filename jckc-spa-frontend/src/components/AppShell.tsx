@@ -14,6 +14,7 @@ import { Button } from '#/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -110,13 +111,13 @@ export function AppShell({
                 className="md:hidden"
                 aria-label="Open main menu"
               >
-                <MenuIcon className="size-5" />
+                <MenuIcon data-icon="icon" />
               </Button>
             </SheetTrigger>
             <SheetContent side="left" className="w-72">
               <SheetHeader>
                 <SheetTitle>
-                  <span className="island-kicker block">Kidz Clubhouse</span>
+                  <span className="island-kicker block">Daycare App</span>
                   <span className="display-title text-2xl font-semibold text-[var(--sea-ink)]">
                     JCKC
                   </span>
@@ -137,16 +138,17 @@ export function AppShell({
                     {item.label}
                   </Link>
                 ))}
-                <button
+                <Button
                   type="button"
+                  variant="ghost"
                   onClick={() => {
                     setMobileOpen(false)
                     void handleSignOut()
                   }}
-                  className="mt-2 flex items-center gap-2 rounded-lg border-t border-[var(--line)] px-3 py-2 pt-4 text-left text-base font-semibold text-[var(--sea-ink-soft)] hover:text-[var(--sea-ink)]"
+                  className="mt-2 justify-start rounded-lg border-t border-[var(--line)] px-3 py-2 pt-4 text-base font-semibold text-[var(--sea-ink-soft)] hover:text-[var(--sea-ink)]"
                 >
-                  <LogOutIcon className="size-4" /> Sign out
-                </button>
+                  <LogOutIcon data-icon="inline-start" /> Sign out
+                </Button>
               </nav>
             </SheetContent>
           </Sheet>
@@ -160,7 +162,7 @@ export function AppShell({
             <span className="display-title text-xl leading-none font-bold text-[var(--header-ink)]">
               JCKC
             </span>
-            <span className="island-kicker text-[0.56rem]">Kidz Clubhouse</span>
+            <span className="island-kicker text-[0.56rem]">Daycare App</span>
           </Link>
 
           {/* desktop nav */}
@@ -187,10 +189,12 @@ export function AppShell({
             <ThemeToggle />
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button
+                <Button
                   type="button"
+                  variant="ghost"
+                  size="icon"
                   aria-label="Account menu"
-                  className="rounded-full outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+                  className="rounded-full p-0 outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
                 >
                   <Avatar className="size-9 border border-white/30">
                     {user.image ? (
@@ -200,7 +204,7 @@ export function AppShell({
                       {initial}
                     </AvatarFallback>
                   </Avatar>
-                </button>
+                </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="min-w-52">
                 <DropdownMenuLabel>
@@ -212,14 +216,16 @@ export function AppShell({
                   </span>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  onSelect={() => void navigate({ to: '/profile' })}
-                >
-                  <UserRoundIcon /> Profile
-                </DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => void handleSignOut()}>
-                  <LogOutIcon /> Sign out
-                </DropdownMenuItem>
+                <DropdownMenuGroup>
+                  <DropdownMenuItem
+                    onSelect={() => void navigate({ to: '/profile' })}
+                  >
+                    <UserRoundIcon /> Profile
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onSelect={() => void handleSignOut()}>
+                    <LogOutIcon /> Sign out
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -247,8 +253,8 @@ function ThemeToggle() {
       aria-label="Toggle theme"
       onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
     >
-      <SunIcon className="size-4 dark:hidden" />
-      <MoonIcon className="hidden size-4 dark:block" />
+      <SunIcon data-icon="icon" className="dark:hidden" />
+      <MoonIcon data-icon="icon" className="hidden dark:block" />
     </Button>
   )
 }

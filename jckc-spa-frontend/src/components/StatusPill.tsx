@@ -1,3 +1,4 @@
+import { Badge } from '#/components/ui/badge'
 import { cn } from '#/lib/utils'
 
 export type StatusPillStatus = 'active' | 'inactive' | 'pending'
@@ -22,8 +23,11 @@ export function StatusPill({
 }) {
   const config = CONFIG[status]
   return (
-    <span className={cn('pill', config.className, className)}>
+    <Badge
+      variant="outline"
+      className={cn('pill', config.className, className)}
+    >
       {config.label}
-    </span>
+    </Badge>
   )
 }
