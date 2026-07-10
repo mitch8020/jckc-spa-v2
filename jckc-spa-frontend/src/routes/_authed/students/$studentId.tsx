@@ -197,12 +197,12 @@ function InfoRow({ label, children }: { label: string; children: ReactNode }) {
   return (
     <Field
       orientation="responsive"
-      className="border-t border-[var(--line)] px-4 py-4 sm:gap-4 sm:px-6"
+      className="border-t border-[var(--line)] px-4 py-4 sm:gap-4 sm:px-6 @md/field-group:grid @md/field-group:grid-cols-2"
     >
       <FieldTitle className="text-sm font-semibold text-[var(--sea-ink-soft)]">
         {label}
       </FieldTitle>
-      <FieldContent className="text-sm text-[var(--sea-ink)]">
+      <FieldContent className="text-left text-sm text-[var(--sea-ink)]">
         {children}
       </FieldContent>
     </Field>
