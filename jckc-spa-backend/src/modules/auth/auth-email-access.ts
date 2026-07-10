@@ -4,6 +4,7 @@ export const DEFAULT_AUTH_ALLOWED_EMAILS = [
   'jpmitra.swe@gmail.com',
   'mitrajs@yahoo.com',
   'khinson60@yahoo.com',
+  'joeymitra18@gmail.com',
 ] as const;
 
 type AppRole = 'parent' | 'teacher' | 'admin';
